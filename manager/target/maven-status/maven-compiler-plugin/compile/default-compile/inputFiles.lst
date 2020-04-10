@@ -1,0 +1,12 @@
+/home/kwsilence/IdeaProjects/manager/src/main/java/server/config/SecurityInit.java
+/home/kwsilence/IdeaProjects/manager/src/main/java/server/controller/RegistrationController.java
+/home/kwsilence/IdeaProjects/manager/src/main/java/server/service/UserService.java
+/home/kwsilence/IdeaProjects/manager/src/main/java/server/config/WebSecurityConfig.java
+/home/kwsilence/IdeaProjects/manager/src/main/java/server/repos/ArticleRepo.java
+/home/kwsilence/IdeaProjects/manager/src/main/java/server/config/MvcConfig.java
+/home/kwsilence/IdeaProjects/manager/src/main/java/server/Application.java
+/home/kwsilence/IdeaProjects/manager/src/main/java/server/repos/UserRepo.java
+/home/kwsilence/IdeaProjects/manager/src/main/java/server/entities/User.java
+/home/kwsilence/IdeaProjects/manager/src/main/java/server/entities/Article.java
+/home/kwsilence/IdeaProjects/manager/src/main/java/server/controller/MainController.java
+/home/kwsilence/IdeaProjects/manager/src/main/java/server/entities/Role.java
