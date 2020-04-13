@@ -16,18 +16,18 @@ public class Balance
   @CreationTimestamp
   private Timestamp create_date;
 
-  private Integer credit;
-  private Integer debit;
-  private Integer amount;
+  private Double credit;
+  private Double debit;
+  private Double amount;
 
   public Balance()
   {
-    this.credit = 0;
-    this.debit = 0;
-    this.amount = 0;
+    this.credit = 0.0;
+    this.debit = 0.0;
+    this.amount = 0.0;
   }
 
-  public Balance(Integer credit, Integer debit, Integer amount)
+  public Balance(Double credit, Double debit, Double amount)
   {
     this.credit = credit;
     this.debit = debit;
@@ -44,33 +44,38 @@ public class Balance
     this.id = id;
   }
 
-  public Integer getCredit()
+  public Double getCredit()
   {
     return credit;
   }
 
-  public void setCredit(Integer credit)
+  public void setCredit(Double credit)
   {
     this.credit = credit;
   }
 
-  public Integer getDebit()
+  public Double getDebit()
   {
     return debit;
   }
 
-  public void setDebit(Integer debit)
+  public void setDebit(Double debit)
   {
     this.debit = debit;
   }
 
-  public Integer getAmount()
+  public Double getAmount()
   {
     return amount;
   }
 
-  public void setAmount(Integer amount)
+  public void setAmount(Double amount)
   {
     this.amount = amount;
+  }
+
+  public Timestamp getCreate_date()
+  {
+    return create_date;
   }
 }

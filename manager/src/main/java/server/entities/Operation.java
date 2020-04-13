@@ -17,8 +17,8 @@ public class Operation
   @JoinColumn(name = "article_id")
   private Article article;
 
-  private Integer debit;
-  private Integer credit;
+  private Double debit;
+  private Double credit;
 
   @CreationTimestamp
   private Timestamp create_date;
@@ -27,7 +27,7 @@ public class Operation
   @JoinColumn(name = "balance_id")
   private Balance balance;
 
-  Operation(Article article, Integer debit, Integer credit, Balance balance)
+  public Operation(Article article, Double debit, Double credit, Balance balance)
   {
     this.article = article;
     this.debit = debit;
@@ -55,27 +55,32 @@ public class Operation
     return article;
   }
 
+  public String getArticleName()
+  {
+    return article.getName();
+  }
+
   public void setArticle(Article article)
   {
     this.article = article;
   }
 
-  public Integer getDebit()
+  public Double getDebit()
   {
     return debit;
   }
 
-  public void setDebit(Integer debit)
+  public void setDebit(Double debit)
   {
     this.debit = debit;
   }
 
-  public Integer getCredit()
+  public Double getCredit()
   {
     return credit;
   }
 
-  public void setCredit(Integer credit)
+  public void setCredit(Double credit)
   {
     this.credit = credit;
   }
@@ -88,5 +93,10 @@ public class Operation
   public void setBalance(Balance balance)
   {
     this.balance = balance;
+  }
+
+  public Timestamp getCreate_date()
+  {
+    return create_date;
   }
 }

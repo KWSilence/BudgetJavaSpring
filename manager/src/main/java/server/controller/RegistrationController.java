@@ -51,7 +51,6 @@ public class RegistrationController
     user.setBalance(balance);
     userRepo.save(user);
 
-
     return "redirect:/login";
   }
 }

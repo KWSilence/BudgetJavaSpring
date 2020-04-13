@@ -1,7 +1,6 @@
-<html>
-
+<html lang="en">
 <head>
-    <title>Name table</title>
+    <title>Main page</title>
     <style>
         table {
             border-collapse: collapse;
@@ -16,24 +15,30 @@
 
 <body>
 <div>
+    <strong style="font-size: larger;">Main</strong>
+</div>
+
+<div style="margin-top: 10px;">
     <form action="/logout" method="post">
         <input type="submit" value="Sign Out"/>
         <input type="hidden" name="_csrf" value="{{_csrf.token}}"/>
     </form>
 </div>
+
 <div>
-    <form method="post" action="add">
-        <input type="text" name="name" placeholder="Enter Name">
-        <input type="hidden" name="_csrf" value="{{_csrf.token}}"/>
-        <button type="submit">Add</button>
-    </form>
+    {{#user}}
+        <strong style="font-size: large;">User: {{username}}</strong>
+    {{/user}}
 </div>
+
 <div>
-    <form method="post" action="filter">
-        <input type="text" name="filter" placeholder="Name to find">
-        <input type="hidden" name="_csrf" value="{{_csrf.token}}"/>
-        <button type="submit">Find</button>
-    </form>
+    {{#balance}}
+        <strong style="font-size: medium;">Balance:</strong>
+        <div style="white-space: pre-wrap;"> Date:      {{create_date}}</div>
+        <div style="white-space: pre-wrap;"> Debit:     {{debit}}</div>
+        <div style="white-space: pre-wrap;"> Credit:    {{credit}}</div>
+        <div style="white-space: pre-wrap;"> Amount:    {{amount}}</div>
+    {{/balance}}
 </div>
 
 {{#error}}
@@ -42,21 +47,58 @@
     </div>
 {{/error}}
 
+<div style="margin-top: 10px;">
+    <form method="post" action="add">
+        <label>
+            <input type=text list=articles name="articles">
+        </label>
+        <datalist id=articles>
+            {{#articles}}
+                <option>{{name}}</option>
+            {{/articles}}
+        </datalist>
+        <input type="text" name="debit" placeholder="Enter debit">
+        <input type="text" name="credit" placeholder="Enter credit">
+        <input type="hidden" name="_csrf" value="{{_csrf.token}}"/>
+        <button type="submit">Add</button>
+    </form>
+</div>
+
+<div>
+    <form method="post" action="filter">
+        <label>
+            <input type=text list=articles name="articles">
+        </label>
+        <datalist id=articles>
+            {{#articles}}
+                <option>{{name}}</option>
+            {{/articles}}
+        </datalist>
+        <input type="hidden" name="_csrf" value="{{_csrf.token}}"/>
+        <button type="submit">Find</button>
+    </form>
+</div>
+
 <div>
     <table>
         <thead>
-        <th>Id</th>
-        <th>Name</th>
+        <th>Article Name</th>
+        <th>Debit</th>
+        <th>Credit</th>
+        <th>Create Date</th>
         </thead>
         <tbody>
-        {{#articles}}
+        {{#operations}}
             <tr>
-                <td>{{id}}</td>
-                <td>{{name}}</td>
+                <td>{{articleName}}</td>
+                <td>{{debit}}</td>
+                <td>{{credit}}</td>
+                <td>{{create_date}}</td>
             </tr>
-        {{/articles}}
+        {{/operations}}
         </tbody>
     </table>
 </div>
+
 </body>
 </html>

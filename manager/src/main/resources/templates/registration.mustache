@@ -1,17 +1,20 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
-    <title>Spring Security Example </title>
+    <title>Registration page</title>
 </head>
 <body>
-{{#error}}
-    <b>{{error}}</b>
-{{/error}}
+<div>
+    <h2>Registration</h2>
+</div>
 <form action="/registration" method="post">
     <div><label> User Name : <input type="text" name="username"/> </label></div>
     <div><label> Password: <input type="password" name="password"/> </label></div>
     <input type="hidden" name="_csrf" value="{{_csrf.token}}"/>
     <div><input type="submit" value="Register"/></div>
 </form>
+{{#error}}
+    <b>{{error}}</b>
+{{/error}}
 </body>
 </html>
