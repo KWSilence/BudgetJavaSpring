@@ -1,4 +1,19 @@
 <html>
+
+<head>
+    <title>Name table</title>
+    <style>
+        table {
+            border-collapse: collapse;
+        }
+
+        table, td, th {
+            border: 1px solid #999;
+            padding: 5px;
+        }
+    </style>
+</head>
+
 <body>
 <div>
     <form action="/logout" method="post">
@@ -20,23 +35,28 @@
         <button type="submit">Find</button>
     </form>
 </div>
-<div>
-    <form method="post" action="truncate">
-        <input type="hidden" name="_csrf" value="{{_csrf.token}}"/>
-        <button type="submit">Truncate</button>
-    </form>
-</div>
+
 {{#error}}
     <div>
         <b><i>{{error}}</i></b>
     </div>
 {{/error}}
 
-{{#articles}}
-    <div>
-        <span><b>{{id}}</b></span>
-        {{name}}
-    </div>
-{{/articles}}
+<div>
+    <table>
+        <thead>
+        <th>Id</th>
+        <th>Name</th>
+        </thead>
+        <tbody>
+        {{#articles}}
+            <tr>
+                <td>{{id}}</td>
+                <td>{{name}}</td>
+            </tr>
+        {{/articles}}
+        </tbody>
+    </table>
+</div>
 </body>
 </html>

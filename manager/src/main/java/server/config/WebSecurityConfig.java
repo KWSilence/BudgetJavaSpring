@@ -11,37 +11,37 @@ import server.service.UserService;
 
 @Configuration
 @EnableWebSecurity
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-    private final UserService userService;
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter
+{
+  private final UserService userService;
 
-    public WebSecurityConfig(UserService userService) {
-        this.userService = userService;
-    }
+  public WebSecurityConfig(UserService userService)
+  {
+    this.userService = userService;
+  }
 
-    @Bean
-    public BCryptPasswordEncoder bCryptPasswordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+  @Bean
+  public BCryptPasswordEncoder bCryptPasswordEncoder()
+  {
+    return new BCryptPasswordEncoder();
+  }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http
-                .authorizeRequests()
-                .antMatchers("/", "/registration").permitAll()
-                .anyRequest().authenticated()
-                .and()
-                    .formLogin()
-                    .loginPage("/login")
-                    .permitAll()
-                .and()
-                    .logout()
-                    .permitAll()
-                    .logoutSuccessUrl("/");
-    }
+  @Override
+  protected void configure(HttpSecurity http) throws Exception
+  {
+    http.authorizeRequests().antMatchers("/", "/registration").permitAll().anyRequest().authenticated().and().formLogin().loginPage("/login").permitAll().and().logout().permitAll().logoutSuccessUrl("/");
+  }
 
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userService)
-                .passwordEncoder(bCryptPasswordEncoder());
+  @Override
+  protected void configure(AuthenticationManagerBuilder auth) throws Exception
+  {
+    try
+    {
+      auth.userDetailsService(userService).passwordEncoder(bCryptPasswordEncoder());
     }
+    catch (Exception e)
+    {
+      System.out.println("Authentication failed...");
+    }
+  }
 }

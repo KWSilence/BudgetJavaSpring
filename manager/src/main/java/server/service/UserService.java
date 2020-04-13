@@ -7,15 +7,18 @@ import org.springframework.stereotype.Service;
 import server.repos.UserRepo;
 
 @Service
-public class UserService implements UserDetailsService {
-    private final UserRepo userRepo;
+public class UserService implements UserDetailsService
+{
+  private final UserRepo userRepo;
 
-    public UserService(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
+  public UserService(UserRepo userRepo)
+  {
+    this.userRepo = userRepo;
+  }
 
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepo.findByUsername(username);
-    }
+  @Override
+  public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException
+  {
+    return userRepo.findByUsername(username);
+  }
 }

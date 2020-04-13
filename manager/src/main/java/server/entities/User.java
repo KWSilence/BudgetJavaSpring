@@ -8,81 +8,111 @@ import java.util.Collection;
 import java.util.Set;
 
 @Entity
-public class User implements UserDetails {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Integer id;
-    private String username;
-    private String password;
-    private boolean active;
+public class User implements UserDetails
+{
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Integer id;
+  private String username;
+  private String password;
+  private boolean active;
 
-    @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
-    @CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"))
-    @Enumerated(EnumType.STRING)
-    private Set<Role> roles;
+  @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
+  @CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"))
+  @Enumerated(EnumType.STRING)
+  private Set<Role> roles;
 
-    public Integer getId() {
-        return id;
-    }
+  @OneToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "balance_id")
+  Balance balance;
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+  public Integer getId()
+  {
+    return id;
+  }
 
-    public String getUsername() {
-        return username;
-    }
+  public void setId(Integer id)
+  {
+    this.id = id;
+  }
 
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
+  public String getUsername()
+  {
+    return username;
+  }
 
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
+  @Override
+  public boolean isAccountNonExpired()
+  {
+    return true;
+  }
 
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
+  @Override
+  public boolean isAccountNonLocked()
+  {
+    return true;
+  }
 
-    @Override
-    public boolean isEnabled() {
-        return isActive();
-    }
+  @Override
+  public boolean isCredentialsNonExpired()
+  {
+    return true;
+  }
 
-    public boolean isActive() {
-        return active;
-    }
+  @Override
+  public boolean isEnabled()
+  {
+    return isActive();
+  }
 
-    public void setActive(boolean active) {
-        this.active = active;
-    }
+  public boolean isActive()
+  {
+    return active;
+  }
 
-    public Set<Role> getRoles() {
-        return roles;
-    }
+  public void setActive(boolean active)
+  {
+    this.active = active;
+  }
 
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
-    }
+  public Set<Role> getRoles()
+  {
+    return roles;
+  }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+  public void setRoles(Set<Role> roles)
+  {
+    this.roles = roles;
+  }
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return getRoles();
-    }
+  public void setUsername(String username)
+  {
+    this.username = username;
+  }
 
-    public String getPassword() {
-        return password;
-    }
+  @Override
+  public Collection<? extends GrantedAuthority> getAuthorities()
+  {
+    return getRoles();
+  }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+  public String getPassword()
+  {
+    return password;
+  }
+
+  public void setPassword(String password)
+  {
+    this.password = password;
+  }
+
+  public Balance getBalance()
+  {
+    return balance;
+  }
+
+  public void setBalance(Balance balance)
+  {
+    this.balance = balance;
+  }
 }

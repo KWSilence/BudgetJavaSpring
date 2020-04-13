@@ -2,11 +2,13 @@ package server.entities;
 
 import org.springframework.security.core.GrantedAuthority;
 
-public enum Role implements GrantedAuthority {
-    USER;
+public enum Role implements GrantedAuthority
+{
+  USER;
 
-    @Override
-    public String getAuthority() {
-        return name();
-    }
+  @Override
+  public String getAuthority()
+  {
+    return name();
+  }
 }
