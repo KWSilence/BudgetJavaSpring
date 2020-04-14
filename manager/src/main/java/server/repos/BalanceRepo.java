@@ -7,4 +7,5 @@ import server.entities.Balance;
 @Repository
 public interface BalanceRepo extends JpaRepository<Balance, Long>
 {
+
 }

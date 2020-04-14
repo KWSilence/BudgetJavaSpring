@@ -1,5 +1,6 @@
 package server.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -14,7 +15,9 @@ public class User implements UserDetails
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
   private String username;
+  @JsonIgnore
   private String password;
+  @JsonIgnore
   private boolean active;
 
   @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
@@ -22,7 +25,7 @@ public class User implements UserDetails
   @Enumerated(EnumType.STRING)
   private Set<Role> roles;
 
-  @OneToOne(fetch = FetchType.EAGER)
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "balance_id")
   private Balance balance;
 
