@@ -145,12 +145,46 @@ public class MainController
   {
     if (!articleRepo.findByName(article).isEmpty())
     {
-      model.put("error", "this Article is exist");
+      model.put("error", "Add Article: this Article is exist");
       updatePage(model, false);
       return "main";
     }
 
     Article newArticle = new Article();
+    newArticle.setName(article);
+    articleRepo.save(newArticle);
+
+    updatePage(model, false);
+    return "main";
+  }
+
+  @PostMapping("changeArticle")
+  @PreAuthorize("hasAuthority('ADMIN')")
+  public String changeArticle(@RequestParam List<String> articles, @RequestParam String article, Map<String, Object> model)
+  {
+    if (articles.isEmpty())
+    {
+      model.put("error", "Change: article field is empty");
+      updatePage(model, false);
+      return "main";
+    }
+
+    List<Article> findArticle = articleRepo.findByName(articles.get(0));
+    if (findArticle.isEmpty())
+    {
+      model.put("error", "Change: this article not found");
+      updatePage(model, false);
+      return "main";
+    }
+
+    if (!articleRepo.findByName(article).isEmpty())
+    {
+      model.put("error", "Change Article: this Article is exist");
+      updatePage(model, false);
+      return "main";
+    }
+
+    Article newArticle = findArticle.get(0);
     newArticle.setName(article);
     articleRepo.save(newArticle);
 

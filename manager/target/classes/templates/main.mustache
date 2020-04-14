@@ -80,13 +80,32 @@
 {{/isUser}}
 
 {{#isAdmin}}
-    <form method="post" action="addArticle" style="margin-top: 10px;">
-        <label>
-            <input type="text" name="article" placeholder="Enter article">
-        </label>
-        <!--        <input type="hidden" name="_csrf" value="{_csrf.token}}"/>-->
-        <button type="submit">Add Article</button>
-    </form>
+    <div>
+        <form method="post" action="addArticle" style="margin-top: 10px;">
+            <label>
+                <input type="text" name="article" placeholder="Enter article">
+            </label>
+            <!--        <input type="hidden" name="_csrf" value="{_csrf.token}}"/>-->
+            <button type="submit">Add Article</button>
+        </form>
+    </div>
+
+    <div>
+        <form method="post" action="changeArticle" style="margin-top: 10px;">
+            <label>
+                <input type=text list=articles name="articles">
+            </label>
+            <datalist id=articles>
+                {{#articles}}
+                    <option>{{name}}</option>
+                {{/articles}}
+            </datalist>
+            <label>
+                <input type="text" name="article" placeholder="Enter new Article">
+            </label>
+            <button type="submit">Change Article</button>
+        </form>
+    </div>
 {{/isAdmin}}
 
 {{#error}}
