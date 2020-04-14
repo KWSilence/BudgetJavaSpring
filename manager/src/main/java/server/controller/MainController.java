@@ -1,6 +1,7 @@
 package server.controller;
 
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -138,6 +139,25 @@ public class MainController
     return "main";
   }
 
+  @PostMapping("addArticle")
+  @PreAuthorize("hasAuthority('ADMIN')")
+  public String addArticle(@RequestParam String article, Map<String, Object> model)
+  {
+    if (!articleRepo.findByName(article).isEmpty())
+    {
+      model.put("error", "this Article is exist");
+      updatePage(model, false);
+      return "main";
+    }
+
+    Article newArticle = new Article();
+    newArticle.setName(article);
+    articleRepo.save(newArticle);
+
+    updatePage(model, false);
+    return "main";
+  }
+
   private void updatePage(Map<String, Object> model, boolean isFind)
   {
     if (!isFind)
@@ -145,6 +165,15 @@ public class MainController
       model.put("operations", operationRepo.findByBalance(this.user.getBalance()).stream()
         .sorted(Comparator.comparing(Operation::getCreate_date).reversed())
         .collect(Collectors.toList()));
+    }
+    if (user.isAdmin())
+    {
+      model.put("isAdmin", true);
+      model.put("articleNames", articleRepo.findAll());
+    }
+    else
+    {
+      model.put("isUser", true);
     }
     model.put("user", this.user);
     model.put("balance", this.user.getBalance());

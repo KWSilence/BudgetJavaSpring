@@ -10,6 +10,7 @@ server\config\SecurityInit.class
 server\entities\Operation.class
 server\controller\RegistrationController.class
 server\repos\UserRepo.class
+server\config\ManagerController.class
 server\entities\Balance.class
 server\entities\User.class
 server\entities\Role.class

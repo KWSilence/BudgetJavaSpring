@@ -21,7 +21,7 @@
 <div style="margin-top: 10px;">
     <form action="/logout" method="post">
         <input type="submit" value="Sign Out"/>
-        <input type="hidden" name="_csrf" value="{{_csrf.token}}"/>
+        <!--        <input type="hidden" name="_csrf" value="{_csrf.token}}"/>-->
     </form>
 </div>
 
@@ -31,74 +31,98 @@
     {{/user}}
 </div>
 
-<div>
-    {{#balance}}
-        <strong style="font-size: medium;">Balance:</strong>
-        <div style="white-space: pre-wrap;"> Date:      {{create_date}}</div>
-        <div style="white-space: pre-wrap;"> Debit:     {{debit}}</div>
-        <div style="white-space: pre-wrap;"> Credit:    {{credit}}</div>
-        <div style="white-space: pre-wrap;"> Amount:    {{amount}}</div>
-    {{/balance}}
-</div>
+{{#isUser}}
+    <div>
+        {{#balance}}
+            <strong style="font-size: medium;">Balance:</strong>
+            <div style="white-space: pre-wrap;"> Date:      {{create_date}}</div>
+            <div style="white-space: pre-wrap;"> Debit:     {{debit}}</div>
+            <div style="white-space: pre-wrap;"> Credit:    {{credit}}</div>
+            <div style="white-space: pre-wrap;"> Amount:    {{amount}}</div>
+        {{/balance}}
+    </div>
+
+    <div style="margin-top: 10px;">
+        <form method="post" action="add">
+            <label>
+                <input type=text list=articles name="articles">
+            </label>
+            <datalist id=articles>
+                {{#articles}}
+                    <option>{{name}}</option>
+                {{/articles}}
+            </datalist>
+            <label>
+                <input type="text" name="debit" placeholder="Enter debit">
+            </label>
+            <label>
+                <input type="text" name="credit" placeholder="Enter credit">
+            </label>
+            <!--        <input type="hidden" name="_csrf" value="{_csrf.token}}"/>-->
+            <button type="submit">Add</button>
+        </form>
+    </div>
+
+    <div>
+        <form method="post" action="filter">
+            <label>
+                <input type=text list=articles name="articles">
+            </label>
+            <datalist id=articles>
+                {{#articles}}
+                    <option>{{name}}</option>
+                {{/articles}}
+            </datalist>
+            <!--        <input type="hidden" name="_csrf" value="{_csrf.token}}"/>-->
+            <button type="submit">Find</button>
+        </form>
+    </div>
+{{/isUser}}
+
+{{#isAdmin}}
+    <form method="post" action="addArticle" style="margin-top: 10px;">
+        <label>
+            <input type="text" name="article" placeholder="Enter article">
+        </label>
+        <!--        <input type="hidden" name="_csrf" value="{_csrf.token}}"/>-->
+        <button type="submit">Add Article</button>
+    </form>
+{{/isAdmin}}
 
 {{#error}}
-    <div>
+    <div style="margin-top: 10px;">
         <b><i>{{error}}</i></b>
     </div>
 {{/error}}
 
-<div style="margin-top: 10px;">
-    <form method="post" action="add">
-        <label>
-            <input type=text list=articles name="articles">
-        </label>
-        <datalist id=articles>
-            {{#articles}}
-                <option>{{name}}</option>
-            {{/articles}}
-        </datalist>
-        <input type="text" name="debit" placeholder="Enter debit">
-        <input type="text" name="credit" placeholder="Enter credit">
-        <input type="hidden" name="_csrf" value="{{_csrf.token}}"/>
-        <button type="submit">Add</button>
-    </form>
-</div>
+{{#isAdmin}}
+    <div>
+        {{#articleNames}}
+            <div>{{name}}</div>
+        {{/articleNames}}
+    </div>
+{{/isAdmin}}
 
-<div>
-    <form method="post" action="filter">
-        <label>
-            <input type=text list=articles name="articles">
-        </label>
-        <datalist id=articles>
-            {{#articles}}
-                <option>{{name}}</option>
-            {{/articles}}
-        </datalist>
-        <input type="hidden" name="_csrf" value="{{_csrf.token}}"/>
-        <button type="submit">Find</button>
-    </form>
-</div>
-
-<div>
-    <table>
-        <thead>
-        <th>Article Name</th>
-        <th>Debit</th>
-        <th>Credit</th>
-        <th>Create Date</th>
-        </thead>
-        <tbody>
-        {{#operations}}
+{{#isUser}}
+    <div>
+        <table>
             <tr>
-                <td>{{articleName}}</td>
-                <td>{{debit}}</td>
-                <td>{{credit}}</td>
-                <td>{{create_date}}</td>
+                <th>Article Name</th>
+                <th>Debit</th>
+                <th>Credit</th>
+                <th>Create Date</th>
             </tr>
-        {{/operations}}
-        </tbody>
-    </table>
-</div>
+            {{#operations}}
+                <tr>
+                    <td>{{articleName}}</td>
+                    <td>{{debit}}</td>
+                    <td>{{credit}}</td>
+                    <td>{{create_date}}</td>
+                </tr>
+            {{/operations}}
+        </table>
+    </div>
+{{/isUser}}
 
 </body>
 </html>

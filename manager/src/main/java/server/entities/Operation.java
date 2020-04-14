@@ -1,5 +1,6 @@
 package server.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
@@ -11,10 +12,11 @@ public class Operation
 {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Integer id;
+  private Long id;
 
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "article_id")
+  @JsonIgnore
   private Article article;
 
   private Double debit;
@@ -25,6 +27,7 @@ public class Operation
 
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "balance_id")
+  @JsonIgnore
   private Balance balance;
 
   public Operation(Article article, Double debit, Double credit, Balance balance)
@@ -40,12 +43,12 @@ public class Operation
 
   }
 
-  public Integer getId()
+  public Long getId()
   {
     return id;
   }
 
-  public void setId(Integer id)
+  public void setId(Long id)
   {
     this.id = id;
   }

@@ -12,7 +12,7 @@ public class User implements UserDetails
 {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Integer id;
+  private Long id;
   private String username;
   private String password;
   private boolean active;
@@ -24,14 +24,14 @@ public class User implements UserDetails
 
   @OneToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "balance_id")
-  Balance balance;
+  private Balance balance;
 
-  public Integer getId()
+  public Long getId()
   {
     return id;
   }
 
-  public void setId(Integer id)
+  public void setId(Long id)
   {
     this.id = id;
   }
@@ -39,6 +39,11 @@ public class User implements UserDetails
   public String getUsername()
   {
     return username;
+  }
+
+  public boolean isAdmin()
+  {
+    return roles.contains(Role.ADMIN);
   }
 
   @Override
