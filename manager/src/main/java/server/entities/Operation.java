@@ -63,11 +63,6 @@ public class Operation
     return article.getName();
   }
 
-  public Long getBalanceID()
-  {
-    return balance.getId();
-  }
-
   public void setArticle(Article article)
   {
     this.article = article;
@@ -96,6 +91,11 @@ public class Operation
   public Balance getBalance()
   {
     return balance;
+  }
+
+  public Long getBalanceID()
+  {
+    return balance.getId();
   }
 
   public void setBalance(Balance balance)

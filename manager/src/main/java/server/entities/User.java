@@ -23,6 +23,7 @@ public class User implements UserDetails
   @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
   @CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"))
   @Enumerated(EnumType.STRING)
+  @JsonIgnore
   private Set<Role> roles;
 
   @ManyToOne(fetch = FetchType.EAGER)
@@ -50,29 +51,34 @@ public class User implements UserDetails
   }
 
   @Override
+  @JsonIgnore
   public boolean isAccountNonExpired()
   {
     return true;
   }
 
   @Override
+  @JsonIgnore
   public boolean isAccountNonLocked()
   {
     return true;
   }
 
   @Override
+  @JsonIgnore
   public boolean isCredentialsNonExpired()
   {
     return true;
   }
 
   @Override
+  @JsonIgnore
   public boolean isEnabled()
   {
     return isActive();
   }
 
+  @JsonIgnore
   public boolean isActive()
   {
     return active;
@@ -99,6 +105,7 @@ public class User implements UserDetails
   }
 
   @Override
+  @JsonIgnore
   public Collection<? extends GrantedAuthority> getAuthorities()
   {
     return getRoles();

@@ -54,6 +54,11 @@ public class Balance
     this.credit = credit;
   }
 
+  public void changeCredit(Double credit)
+  {
+    this.credit = (this.credit * 100 + credit * 100) / 100;
+  }
+
   public Double getDebit()
   {
     return debit;
@@ -62,6 +67,11 @@ public class Balance
   public void setDebit(Double debit)
   {
     this.debit = debit;
+  }
+
+  public void changeDebit(Double debit)
+  {
+    this.debit = (this.debit * 100 + debit * 100) / 100;
   }
 
   public Double getAmount()
@@ -74,8 +84,20 @@ public class Balance
     this.amount = amount;
   }
 
+  public void updateAmount()
+  {
+    this.amount = (this.debit * 100 - this.credit * 100) / 100;
+  }
+
   public Timestamp getCreate_date()
   {
     return create_date;
+  }
+
+  public void reset()
+  {
+    this.amount = 0.0;
+    this.debit = 0.0;
+    this.credit = 0.0;
   }
 }

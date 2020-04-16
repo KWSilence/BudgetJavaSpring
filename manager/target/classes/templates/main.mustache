@@ -21,93 +21,70 @@
 <div style="margin-top: 10px;">
     <form action="/logout" method="post">
         <input type="submit" value="Sign Out"/>
-        <!--        <input type="hidden" name="_csrf" value="{_csrf.token}}"/>-->
     </form>
 </div>
 
 <div>
-    {{#user}}
-        <strong style="font-size: large;">User: {{username}}</strong>
-    {{/user}}
+    <strong style="font-size: large;" id="user"></strong>
 </div>
 
-{{#isUser}}
-    <div>
-        {{#balance}}
-            <strong style="font-size: medium;">Balance:</strong>
-            <div style="white-space: pre-wrap;"> Date:      {{create_date}}</div>
-            <div style="white-space: pre-wrap;"> Debit:     {{debit}}</div>
-            <div style="white-space: pre-wrap;"> Credit:    {{credit}}</div>
-            <div style="white-space: pre-wrap;"> Amount:    {{amount}}</div>
-        {{/balance}}
-    </div>
+<div id="balance" style="margin-top: 10px;"></div>
 
-    <div style="margin-top: 10px;">
-        <form method="post" action="add">
-            <label>
-                <input type=text list=articles name="articles">
-            </label>
-            <datalist id=articles>
-                {{#articles}}
-                    <option>{{name}}</option>
-                {{/articles}}
-            </datalist>
-            <label>
-                <input type="text" name="debit" placeholder="Enter debit">
-            </label>
-            <label>
-                <input type="text" name="credit" placeholder="Enter credit">
-            </label>
-            <!--        <input type="hidden" name="_csrf" value="{_csrf.token}}"/>-->
-            <button type="submit">Add</button>
-        </form>
-    </div>
+<div style="margin-top: 10px;">
+    <form method="post" action="add" id="addOperation" style="display: none">
+        <label>
+            <input type=text list=articles name="articles">
+        </label>
+        <datalist id=articles></datalist>
+        <label>
+            <input type="text" name="debit" placeholder="Enter debit">
+        </label>
+        <label>
+            <input type="text" name="credit" placeholder="Enter credit">
+        </label>
+        <button type="submit">Add</button>
+    </form>
+</div>
 
-    <div>
-        <form method="post" action="filter">
-            <label>
-                <input type=text list=articles name="articles">
-            </label>
-            <datalist id=articles>
-                {{#articles}}
-                    <option>{{name}}</option>
-                {{/articles}}
-            </datalist>
-            <!--        <input type="hidden" name="_csrf" value="{_csrf.token}}"/>-->
-            <button type="submit">Find</button>
-        </form>
-    </div>
-{{/isUser}}
+<div>
+    <form method="post" action="filter" id="filter" style="display: none">
+        <label>
+            <input type=text list=articles name="articles">
+        </label>
+        <datalist id=articles></datalist>
+        <button type="submit">Find</button>
+    </form>
+</div>
 
-{{#isAdmin}}
-    <div>
-        <form method="post" action="addArticle" style="margin-top: 10px;">
+<div>
+    <form method="post" action="deleteAll" id="deleteAll" style="display: none">
+        <button type="submit">deleteAll</button>
+    </form>
+</div>
+
+<div>
+    <form method="post" action="/api/articles" style="margin-top: 10px; display: none;" id="addArticle">
+        <div>
             <label>
-                <input type="text" name="article" placeholder="Enter article">
+                <input type="text" id="article" placeholder="Enter article">
             </label>
-            <!--        <input type="hidden" name="_csrf" value="{_csrf.token}}"/>-->
             <button type="submit">Add Article</button>
-        </form>
-    </div>
+        </div>
+    </form>
+</div>
 
-    <div>
-        <form method="post" action="changeArticle" style="margin-top: 10px;">
-            <label>
-                <input type=text list=articles name="articles">
-            </label>
-            <datalist id=articles>
-                {{#articles}}
-                    <option>{{name}}</option>
-                {{/articles}}
-            </datalist>
-            <label>
-                <input type="text" name="article" placeholder="Enter new Article">
-            </label>
-            <!--        <input type="hidden" name="_csrf" value="{_csrf.token}}"/>-->
-            <button type="submit">Change Article</button>
-        </form>
-    </div>
-{{/isAdmin}}
+<div>
+    <form method="post" action="changeArticle" style="margin-top: 10px; display: none;" id="changeArticle">
+        <label>
+            <input type=text list=articles name="articles">
+        </label>
+        <datalist id=articles></datalist>
+        <label>
+            <input type="text" name="article" placeholder="Enter new Article">
+        </label>
+        <button type="submit">Change Article</button>
+    </form>
+</div>
 
 {{#error}}
     <div style="margin-top: 10px;">
@@ -115,34 +92,178 @@
     </div>
 {{/error}}
 
-{{#isAdmin}}
-    <div>
-        {{#articleNames}}
-            <div>{{name}}</div>
-        {{/articleNames}}
-    </div>
-{{/isAdmin}}
+<div id="articlesName"></div>
 
-{{#isUser}}
-    <div>
-        <table>
-            <tr>
-                <th>Article Name</th>
-                <th>Debit</th>
-                <th>Credit</th>
-                <th>Create Date</th>
-            </tr>
-            {{#operations}}
-                <tr>
-                    <td>{{articleName}}</td>
-                    <td>{{debit}}</td>
-                    <td>{{credit}}</td>
-                    <td>{{create_date}}</td>
-                </tr>
-            {{/operations}}
-        </table>
-    </div>
-{{/isUser}}
+<div>
+    <table id="operations" style="display: none">
+        <tbody>
+        <tr>
+            <th>ID</th>
+            <th>Article Name</th>
+            <th>Debit</th>
+            <th>Credit</th>
+            <th>Create Date</th>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!--    <div>-->
+<!--        <table>-->
+<!--            {#operations}}-->
+<!--                <tr>-->
+<!--                    <td>{id}}</td>-->
+<!--                    <td>{articleName}}</td>-->
+<!--                    <td>{debit}}</td>-->
+<!--                    <td>{credit}}</td>-->
+<!--                    <td>{create_date}}</td>-->
+<!--                    <td>-->
+<!--                        <form method="post" action="tableChange">-->
+<!--                            <input type="hidden" name="id" value="{id}}"/>-->
+<!--                            <input type="hidden" name="action" value="delete"/>-->
+<!--                                    <input type="hidden" name="_csrf" value="{_csrf.token}}"/>-->
+<!--                            <button type="submit">delete</button>-->
+<!--                        </form>-->
+<!--                    </td>-->
+<!--                </tr>-->
+<!--            {/operations}}-->
+<!--        </table>-->
+<!--    </div>-->
+
+<script>
+    window.onload = function initTable() {
+        let table = document.getElementById('operations');
+        let balance = document.getElementById('balance');
+        let user = document.getElementById('user');
+        let articles = document.getElementById('articles');
+        let articlesName = document.getElementById('articlesName');
+
+        let xhr = new XMLHttpRequest();
+        xhr.open('GET', '/api/me', false);
+        xhr.send();
+        let currentUser = JSON.parse(xhr.responseText);
+        user.appendChild(document.createTextNode("User: " + currentUser.username));
+
+        console.log(currentUser);
+
+        fetch('/api/articles', {
+            method: 'get'
+        })
+                .then(res => res.json())
+                .then(function (data) {
+                    console.log('Get articles request succeeded with JSON response', data);
+                    restArticles = data;
+                    for (let index = 0; index < data.length; index++) {
+                        let toption = document.createElement("OPTION");
+                        toption.appendChild(document.createTextNode(data[index].name));
+                        articles.appendChild(toption);
+                    }
+                })
+                .catch(function (error) {
+                    console.log('Request failed', error);
+                });
+        if (currentUser.admin) {
+            document.getElementById("addArticle").style.display = 'block';
+            document.getElementById("changeArticle").style.display = 'block';
+            fetch('/api/articles', {
+                method: 'get'
+            })
+                    .then(res => res.json())
+                    .then(function (data) {
+                        console.log('Get articles request succeeded with JSON response', data);
+
+                        data.sort(function (a, b) {
+                            if (a.id > b.id) {
+                                return 1;
+                            }
+                            if (a.id < b.id) {
+                                return -1;
+                            }
+                            return 0;
+                        });
+
+                        for (let index = 0; index < data.length; index++) {
+                            let div = document.createElement("DIV");
+                            let b = document.createElement("B");
+                            let articleName = document.createElement("SPAN");
+                            b.appendChild(document.createTextNode(data[index].id + " "));
+                            articleName.appendChild(document.createTextNode(data[index].name));
+                            div.appendChild(b);
+                            div.appendChild(articleName);
+                            articlesName.appendChild(div);
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log('Request failed', error);
+                    });
+        } else {
+            document.getElementById("operations").style.display = 'table';
+            document.getElementById("deleteAll").style.display = 'table';
+            document.getElementById("filter").style.display = 'table';
+            document.getElementById("addOperation").style.display = 'table';
+            fetch('/api/balance/operations', {
+                method: 'get'
+            })
+                    .then(res => res.json())
+                    .then(function (data) {
+                        console.log('Get operations request succeeded with JSON response', data);
+
+                        let tbody = table.getElementsByTagName("TBODY")[0];
+
+                        for (let index = 0; index < data.length; index++) {
+                            let row = document.createElement("TR");
+                            let td = document.createElement("TD");
+                            td.appendChild(document.createTextNode(data[index].id));
+                            row.appendChild(td);
+                            td = document.createElement("TD");
+                            td.appendChild(document.createTextNode(data[index].articleName));
+                            row.appendChild(td);
+                            td = document.createElement("TD");
+                            td.appendChild(document.createTextNode(data[index].debit));
+                            row.appendChild(td);
+                            td = document.createElement("TD");
+                            td.appendChild(document.createTextNode(data[index].credit));
+                            row.appendChild(td);
+                            td = document.createElement("TD");
+                            td.appendChild(document.createTextNode(data[index].create_date));
+                            row.appendChild(td);
+
+                            tbody.appendChild(row);
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log('Request failed', error);
+                    });
+
+            fetch('/api/balance', {
+                method: 'get'
+            })
+                    .then(res => res.json())
+                    .then(function (data) {
+                        console.log('Get balance request succeeded with JSON response', data);
+
+                        let div = document.createElement("DIV");
+                        div.appendChild(document.createTextNode("Balance:"));
+                        balance.appendChild(div);
+                        div = document.createElement("DIV");
+                        div.appendChild(document.createTextNode("Date: " + data.create_date));
+                        balance.appendChild(div);
+                        div = document.createElement("DIV");
+                        div.appendChild(document.createTextNode("Debit: " + data.debit));
+                        balance.appendChild(div);
+                        div = document.createElement("DIV");
+                        div.appendChild(document.createTextNode("Credit: " + data.credit));
+                        balance.appendChild(div);
+                        div = document.createElement("DIV");
+                        div.appendChild(document.createTextNode("Amount: " + data.amount));
+                        balance.appendChild(div);
+                    })
+                    .catch(function (error) {
+                        console.log('Request failed', error);
+                    });
+        }
+    }
+</script>
 
 </body>
 </html>
