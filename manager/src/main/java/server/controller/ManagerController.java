@@ -1,14 +1,11 @@
 package server.controller;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import server.entities.Article;
-import server.entities.Balance;
-import server.entities.Operation;
-import server.entities.User;
+import server.entities.*;
 import server.repos.ArticleRepo;
 import server.repos.BalanceRepo;
 import server.repos.OperationRepo;
@@ -31,6 +28,8 @@ public class ManagerController
 
   private final ArticleRepo articleRepo;
 
+  private Gson gson;
+
   public ManagerController(OperationRepo operationRepo, UserRepo userRepo, BalanceRepo balanceRepo,
                            ArticleRepo articleRepo)
   {
@@ -38,33 +37,33 @@ public class ManagerController
     this.userRepo = userRepo;
     this.balanceRepo = balanceRepo;
     this.articleRepo = articleRepo;
+    this.gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
   }
 
   @GetMapping("me")
-  public ResponseEntity<User> who(@AuthenticationPrincipal User user)
+  public String who(@AuthenticationPrincipal User user)
   {
     Optional<User> findUser = userRepo.findById(user.getId());
     if (findUser.isEmpty())
     {
-      return new ResponseEntity<>(HttpStatus.BAD_GATEWAY);
+      return gson.toJson(new Response("Something wrong", false));
     }
-    return new ResponseEntity<>(findUser.get(), HttpStatus.OK);
+    return gson.toJson(new Response(findUser.get()));
   }
 
   @GetMapping("/balance")
-  public ResponseEntity<Balance> readBalance(@AuthenticationPrincipal User userUp)
+  public String readBalance(@AuthenticationPrincipal User userUp)
   {
     if (userUp.isAdmin())
     {
-      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      return gson.toJson(new Response("Admin have not balance", false));
     }
-    return new ResponseEntity<>(userRepo.findById(userUp.getId()).get().getBalance(), HttpStatus.OK);
+    return gson.toJson(new Response(userRepo.findById(userUp.getId()).get().getBalance()));
   }
 
   @GetMapping("/balance/operations")
-  public ResponseEntity<List<Operation>> readOperations(@AuthenticationPrincipal User userUp,
-                                                        @RequestParam(required = false) String article,
-                                                        @RequestParam(required = false) Long id)
+  public String readOperations(@AuthenticationPrincipal User userUp, @RequestParam(required = false) String article,
+                               @RequestParam(required = false) Long id)
   {
     List<Operation> operations = this.operationRepo.findByBalance(userRepo.findById(userUp.getId()).get().getBalance());
     if (article != null && !article.isEmpty())
@@ -75,14 +74,13 @@ public class ManagerController
     {
       operations = operations.stream().filter(o -> o.getId().equals(id)).collect(Collectors.toList());
     }
-    return operations != null && !operations.isEmpty() ? new ResponseEntity<>(operations, HttpStatus.OK)
-                                                       : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    return operations != null && !operations.isEmpty() ? gson.toJson(new Response(operations))
+                                                       : gson.toJson(new Response("Operations not found", false));
   }
 
   @GetMapping("/users")
   @PreAuthorize("hasAuthority('ADMIN')")
-  public ResponseEntity<List<User>> readUsers(@RequestParam(required = false) Long userID,
-                                              @RequestParam(required = false) String username)
+  public String readUsers(@RequestParam(required = false) Long userID, @RequestParam(required = false) String username)
   {
     List<User> users = new ArrayList<>();
     boolean readed = false;
@@ -99,7 +97,7 @@ public class ManagerController
     {
       if (readed)
       {
-        return new ResponseEntity<>(HttpStatus.CONFLICT);
+        return gson.toJson(new Response("Search should be by ID or by Name", false));
       }
       Optional<User> user = userRepo.findById(userID);
       user.ifPresent(users::add);
@@ -109,15 +107,15 @@ public class ManagerController
     {
       users = userRepo.findAll();
     }
-    return users != null && !users.isEmpty() ? new ResponseEntity<>(users, HttpStatus.OK)
-                                             : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    return users != null && !users.isEmpty() ? gson.toJson(new Response(users))
+                                             : gson.toJson(new Response("Users not found", false));
   }
 
   @GetMapping("/operations")
   @PreAuthorize("hasAuthority('ADMIN')")
-  public ResponseEntity<List<Operation>> readAllOperations(@RequestParam(required = false) Long userID,
-                                                           @RequestParam(required = false) String article,
-                                                           @RequestParam(required = false) Long id)
+  public String readAllOperations(@RequestParam(required = false) Long userID,
+                                  @RequestParam(required = false) String article,
+                                  @RequestParam(required = false) Long id)
   {
     List<Operation> operations = this.operationRepo.findAll();
     if (userID != null)
@@ -125,7 +123,7 @@ public class ManagerController
       Optional<User> user = userRepo.findById(userID);
       if (user.isEmpty())
       {
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return gson.toJson(new Response("User by this ID not found", false));
       }
       operations = operations.stream().filter(o -> o.getBalanceID().equals(user.get().getBalance().getId()))
                              .collect(Collectors.toList());
@@ -140,13 +138,13 @@ public class ManagerController
       operations = operations.stream().filter(o -> o.getId().equals(id)).collect(Collectors.toList());
     }
 
-    return operations != null && !operations.isEmpty() ? new ResponseEntity<>(operations, HttpStatus.OK)
-                                                       : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    return operations != null && !operations.isEmpty() ? gson.toJson(new Response(operations))
+                                                       : gson.toJson(new Response("Operations not found", false));
   }
 
   @GetMapping("/articles")
-  public ResponseEntity<List<Article>> readArticles(@RequestParam(required = false) String article,
-                                                    @RequestParam(required = false) Long articleID)
+  public String readArticles(@RequestParam(required = false) String article,
+                             @RequestParam(required = false) Long articleID)
   {
     List<Article> articles = new ArrayList<>();
     boolean readed = false;
@@ -159,7 +157,7 @@ public class ManagerController
     {
       if (readed)
       {
-        return new ResponseEntity<>(HttpStatus.CONFLICT);
+        return gson.toJson(new Response("Search should be by ID or by Name", false));
       }
       Optional<Article> findArticle = articleRepo.findById(articleID);
       findArticle.ifPresent(articles::add);
@@ -169,28 +167,28 @@ public class ManagerController
     {
       articles = (List<Article>) articleRepo.findAll();
     }
-    return articles != null && !articles.isEmpty() ? new ResponseEntity<>(articles, HttpStatus.OK)
-                                                   : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    return articles != null && !articles.isEmpty() ? gson.toJson(new Response(articles))
+                                                   : gson.toJson(new Response("Articles not found", false));
   }
 
   @PostMapping("/balance/operations")
-  public ResponseEntity<?> addOperation(@AuthenticationPrincipal User userUp, @RequestParam String article,
-                                        @RequestParam(required = false, defaultValue = "0.0") Double debit,
-                                        @RequestParam(required = false, defaultValue = "0.0") Double credit)
+  public String addOperation(@AuthenticationPrincipal User userUp, @RequestParam String article,
+                             @RequestParam(required = false, defaultValue = "0.0") Double debit,
+                             @RequestParam(required = false, defaultValue = "0.0") Double credit)
   {
     List<Article> findArticle = articleRepo.findByName(article);
     if (findArticle.isEmpty())
     {
-      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+      return gson.toJson(new Response("This Article name not found", false));
     }
     if (debit < 0 || credit < 0)
     {
-      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      return gson.toJson(new Response("Debit and Credit should be positive", false));
     }
 
     if (debit.toString().indexOf('.') > 3 || credit.toString().indexOf('.') > 3)
     {
-      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      return gson.toJson(new Response("Debit and Credit should be format *.00", false));
     }
 
     Balance balance = userRepo.findById(userUp.getId()).get().getBalance();
@@ -200,53 +198,53 @@ public class ManagerController
     balance.changeCredit(credit);
     balance.updateAmount();
     balanceRepo.save(balance);
-    return new ResponseEntity<>(HttpStatus.CREATED);
+    return gson.toJson(new Response());
   }
 
   @PostMapping("/articles")
   @PreAuthorize("hasAuthority('ADMIN')")
-  public ResponseEntity<?> addArticle(@RequestParam String article)
+  public String addArticle(@RequestParam String article)
   {
     if (!articleRepo.findByName(article).isEmpty())
     {
-      return new ResponseEntity<>(HttpStatus.CONFLICT);
+      return gson.toJson(new Response("This article name already used", false));
     }
     articleRepo.save(new Article(article));
-    return new ResponseEntity<>(HttpStatus.CREATED);
+    return gson.toJson(new Response());
   }
 
   @PatchMapping("/articles/{id}")
   @PreAuthorize("hasAuthority('ADMIN')")
-  public ResponseEntity<?> changeArticle(@PathVariable Long id, @RequestParam String article)
+  public String changeArticle(@PathVariable Long id, @RequestParam String article)
   {
     Optional<Article> findArticle = articleRepo.findById(id);
     if (findArticle.isEmpty())
     {
-      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+      return gson.toJson(new Response("Article by this id not found", false));
     }
 
     if (!articleRepo.findByName(article).isEmpty())
     {
-      return new ResponseEntity<>(HttpStatus.CONFLICT);
+      return gson.toJson(new Response("This article name already used", false));
     }
     Article newArticle = findArticle.get();
     newArticle.setName(article);
     articleRepo.save(newArticle);
 
-    return new ResponseEntity<>(HttpStatus.ACCEPTED);
+    return gson.toJson(new Response());
   }
 
   @PatchMapping("/balance/operations/{id}")
-  public ResponseEntity<?> changeOperation(@AuthenticationPrincipal User userUp, @PathVariable Long id,
-                                           @RequestParam(required = false) String article,
-                                           @RequestParam(required = false, defaultValue = "0.0") Double debit,
-                                           @RequestParam(required = false, defaultValue = "0.0") Double credit)
+  public String changeOperation(@AuthenticationPrincipal User userUp, @PathVariable Long id,
+                                @RequestParam(required = false) String article,
+                                @RequestParam(required = false, defaultValue = "-1.0") Double debit,
+                                @RequestParam(required = false, defaultValue = "-1.0") Double credit)
   {
     List<Operation> operations = operationRepo.findByBalance(userRepo.findById(userUp.getId()).get().getBalance());
     operations = operations.stream().filter(o -> o.getId().equals(id)).collect(Collectors.toList());
     if (operations.isEmpty())
     {
-      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+      return gson.toJson(new Response("Operation by this id not found", false));
     }
     Operation operation = operations.get(0);
     List<Article> articleList = articleRepo.findByName(article);
@@ -255,12 +253,12 @@ public class ManagerController
       operation.setArticle(articleList.get(0));
     }
     double debitChange = 0.0, creditChange = 0.0;
-    if (debit > 0 && debit.toString().indexOf('.') < 4)
+    if (debit >= 0 && debit.toString().indexOf('.') < 4)
     {
       debitChange = debit - operation.getDebit();
       operation.setDebit(debit);
     }
-    if (credit > 0 && credit.toString().indexOf('.') < 4)
+    if (credit >= 0 && credit.toString().indexOf('.') < 4)
     {
       creditChange = credit - operation.getCredit();
       operation.setCredit(credit);
@@ -272,18 +270,18 @@ public class ManagerController
     balance.updateAmount();
     balanceRepo.save(balance);
     operationRepo.save(operation);
-    return new ResponseEntity<>(HttpStatus.ACCEPTED);
+    return gson.toJson(new Response());
   }
 
   @DeleteMapping("/balance/operations/{id}")
   @PreAuthorize("hasAuthority('USER')")
-  public ResponseEntity<?> deleteOperation(@AuthenticationPrincipal User userUp, @PathVariable Long id)
+  public String deleteOperation(@AuthenticationPrincipal User userUp, @PathVariable Long id)
   {
     List<Operation> operations = operationRepo.findByBalance(userRepo.findById(userUp.getId()).get().getBalance());
     operations = operations.stream().filter(o -> o.getId().equals(id)).collect(Collectors.toList());
     if (operations.isEmpty())
     {
-      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+      return gson.toJson(new Response("Operation by this id not found", false));
     }
     Operation operation = operations.get(0);
     Balance balance = userRepo.findById(userUp.getId()).get().getBalance();
@@ -292,18 +290,17 @@ public class ManagerController
     balance.updateAmount();
     balanceRepo.save(balance);
     operationRepo.delete(operation);
-    return new ResponseEntity<>(HttpStatus.ACCEPTED);
+    return gson.toJson(new Response());
   }
 
   @DeleteMapping("/balance/operations")
-  public ResponseEntity<?> deleteAllOperation(@AuthenticationPrincipal User userUp)
+  public String deleteAllOperation(@AuthenticationPrincipal User userUp)
   {
     Balance balance = userRepo.findById(userUp.getId()).get().getBalance();
     balance.reset();
     balanceRepo.save(balance);
     List<Operation> operations = operationRepo.findByBalance(balance);
     operationRepo.deleteAll(operations);
-    return new ResponseEntity<>(HttpStatus.ACCEPTED);
+    return gson.toJson(new Response());
   }
-
 }

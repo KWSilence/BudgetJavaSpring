@@ -1,6 +1,6 @@
 package server.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.gson.annotations.Expose;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
@@ -12,22 +12,24 @@ public class Operation
 {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Expose
   private Long id;
 
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "article_id")
-  @JsonIgnore
+  @Expose
   private Article article;
-
+  @Expose
   private Double debit;
+  @Expose
   private Double credit;
 
   @CreationTimestamp
+  @Expose
   private Timestamp create_date;
 
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "balance_id")
-  @JsonIgnore
   private Balance balance;
 
   public Operation(Article article, Double debit, Double credit, Balance balance)

@@ -1,6 +1,6 @@
 package server.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.gson.annotations.Expose;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -13,21 +13,22 @@ public class User implements UserDetails
 {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Expose
   private Long id;
+  @Expose
   private String username;
-  @JsonIgnore
   private String password;
-  @JsonIgnore
   private boolean active;
 
   @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
   @CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"))
   @Enumerated(EnumType.STRING)
-  @JsonIgnore
+  @Expose
   private Set<Role> roles;
 
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "balance_id")
+  @Expose
   private Balance balance;
 
   public Long getId()
@@ -51,34 +52,29 @@ public class User implements UserDetails
   }
 
   @Override
-  @JsonIgnore
   public boolean isAccountNonExpired()
   {
     return true;
   }
 
   @Override
-  @JsonIgnore
   public boolean isAccountNonLocked()
   {
     return true;
   }
 
   @Override
-  @JsonIgnore
   public boolean isCredentialsNonExpired()
   {
     return true;
   }
 
   @Override
-  @JsonIgnore
   public boolean isEnabled()
   {
     return isActive();
   }
 
-  @JsonIgnore
   public boolean isActive()
   {
     return active;
@@ -105,7 +101,6 @@ public class User implements UserDetails
   }
 
   @Override
-  @JsonIgnore
   public Collection<? extends GrantedAuthority> getAuthorities()
   {
     return getRoles();

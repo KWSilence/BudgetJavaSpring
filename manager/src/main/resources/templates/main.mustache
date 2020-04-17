@@ -30,73 +30,56 @@
 
 <div id="balance" style="margin-top: 10px;"></div>
 
-<div style="margin-top: 10px;">
-    <form method="post" action="add" id="addOperation" style="display: none">
-        <label>
-            <input type=text list=articles name="articles">
-        </label>
-        <datalist id=articles></datalist>
-        <label>
-            <input type="text" name="debit" placeholder="Enter debit">
-        </label>
-        <label>
-            <input type="text" name="credit" placeholder="Enter credit">
-        </label>
-        <button type="submit">Add</button>
-    </form>
+<div style="margin-top: 10px; display: none" id="addOperation">
+    <label>
+        <input type=text list=articles name="articles" id="articlesInput">
+    </label>
+    <datalist id=articles></datalist>
+    <label>
+        <input type="text" name="debit" id="operationDebit" placeholder="Enter debit">
+    </label>
+    <label>
+        <input type="text" name="credit" id="operationCredit" placeholder="Enter credit">
+    </label>
+    <button type="submit" id="addingOperation">Add</button>
 </div>
 
-<div>
-    <form method="post" action="filter" id="filter" style="display: none">
-        <label>
-            <input type=text list=articles name="articles">
-        </label>
-        <datalist id=articles></datalist>
-        <button type="submit">Find</button>
-    </form>
+<!--<div>-->
+<form method="post" action="filter" id="filter" style="display: none">
+    <!--        <label>-->
+    <!--            <input type=text list=articles name="articles">-->
+    <!--        </label>-->
+    <!--        <datalist id=articles></datalist>-->
+    <!--        <button type="submit">Find</button>-->
+</form>
+<!--</div>-->
+
+<div id="deleteAll" style="display: none">
+    <button type="submit" id="deletingAll">deleteAll</button>
 </div>
 
-<div>
-    <form method="post" action="deleteAll" id="deleteAll" style="display: none">
-        <button type="submit">deleteAll</button>
-    </form>
+<div style="margin-top: 10px; display: none;" id="addArticle">
+    <label>
+        <input type="text" id="articleToAdd" placeholder="Enter article">
+    </label>
+    <button type="submit" id="addingArticle">Add Article</button>
 </div>
 
-<div>
-    <form method="post" action="/api/articles" style="margin-top: 10px; display: none;" id="addArticle">
-        <div>
-            <label>
-                <input type="text" id="article" placeholder="Enter article">
-            </label>
-            <button type="submit">Add Article</button>
-        </div>
-    </form>
+<div id="changeArticle" style="margin-top: 10px; display: none;">
+    <label>
+        <input type=text id="articleToChange" placeholder="Enter ID of Article">
+    </label>
+    <label>
+        <input type="text" id="newArticleToChange" placeholder="Enter new Article name">
+    </label>
+    <button type="submit" id="changingArticle">Change Article</button>
 </div>
-
-<div>
-    <form method="post" action="changeArticle" style="margin-top: 10px; display: none;" id="changeArticle">
-        <label>
-            <input type=text list=articles name="articles">
-        </label>
-        <datalist id=articles></datalist>
-        <label>
-            <input type="text" name="article" placeholder="Enter new Article">
-        </label>
-        <button type="submit">Change Article</button>
-    </form>
-</div>
-
-{{#error}}
-    <div style="margin-top: 10px;">
-        <b><i>{{error}}</i></b>
-    </div>
-{{/error}}
 
 <div id="articlesName"></div>
 
 <div>
-    <table id="operations" style="display: none">
-        <tbody>
+    <table id="operations" style="margin-top: 10px; display: none">
+        <thead>
         <tr>
             <th>ID</th>
             <th>Article Name</th>
@@ -104,33 +87,13 @@
             <th>Credit</th>
             <th>Create Date</th>
         </tr>
-        </tbody>
+        </thead>
+        <tbody></tbody>
     </table>
 </div>
 
-<!--    <div>-->
-<!--        <table>-->
-<!--            {#operations}}-->
-<!--                <tr>-->
-<!--                    <td>{id}}</td>-->
-<!--                    <td>{articleName}}</td>-->
-<!--                    <td>{debit}}</td>-->
-<!--                    <td>{credit}}</td>-->
-<!--                    <td>{create_date}}</td>-->
-<!--                    <td>-->
-<!--                        <form method="post" action="tableChange">-->
-<!--                            <input type="hidden" name="id" value="{id}}"/>-->
-<!--                            <input type="hidden" name="action" value="delete"/>-->
-<!--                                    <input type="hidden" name="_csrf" value="{_csrf.token}}"/>-->
-<!--                            <button type="submit">delete</button>-->
-<!--                        </form>-->
-<!--                    </td>-->
-<!--                </tr>-->
-<!--            {/operations}}-->
-<!--        </table>-->
-<!--    </div>-->
-
 <script>
+    let xhr = new XMLHttpRequest();
     window.onload = function initTable() {
         let table = document.getElementById('operations');
         let balance = document.getElementById('balance');
@@ -138,40 +101,78 @@
         let articles = document.getElementById('articles');
         let articlesName = document.getElementById('articlesName');
 
-        let xhr = new XMLHttpRequest();
         xhr.open('GET', '/api/me', false);
         xhr.send();
         let currentUser = JSON.parse(xhr.responseText);
-        user.appendChild(document.createTextNode("User: " + currentUser.username));
-
-        console.log(currentUser);
+        user.appendChild(document.createTextNode("User: " + currentUser.body.username));
+        let isAdmin = (currentUser.body.roles[0] === "ADMIN");
 
         fetch('/api/articles', {
             method: 'get'
         })
                 .then(res => res.json())
                 .then(function (data) {
+                    if (data.success === false) {
+                        throw data.error;
+                    }
                     console.log('Get articles request succeeded with JSON response', data);
-                    for (let index = 0; index < data.length; index++) {
+                    for (let index = 0; index < data.body.length; index++) {
                         let toption = document.createElement("OPTION");
-                        toption.appendChild(document.createTextNode(data[index].name));
+                        toption.appendChild(document.createTextNode(data.body[index].name));
                         articles.appendChild(toption);
                     }
                 })
                 .catch(function (error) {
                     console.log('Request failed', error);
                 });
-        if (currentUser.admin) {
+        if (isAdmin) {
             document.getElementById("addArticle").style.display = 'block';
             document.getElementById("changeArticle").style.display = 'block';
+            document.getElementById("addingArticle").onclick = function (e) {
+                let article = document.getElementById("articleToAdd");
+                if (article.value === '') {
+                    alert("article field is empty")
+                } else {
+                    xhr.open("POST", "/api/articles?article=" + article.value, false);
+                    xhr.send();
+                    let res = JSON.parse(xhr.responseText);
+                    if (res.success === false) {
+                        alert(res.error);
+                        e.preventDefault();
+                    } else {
+                        location.reload();
+                    }
+                }
+            };
+            document.getElementById("changingArticle").onclick = function (e) {
+                let article = document.getElementById("articleToChange");
+                let newArticle = document.getElementById("newArticleToChange");
+
+                if (article.value === '' || newArticle.value === '') {
+                    alert("articles fields is empty")
+                } else {
+                    xhr.open("PATCH", "/api/articles/" + article.value + "?article=" + newArticle.value, false);
+                    xhr.send();
+                    let res = JSON.parse(xhr.responseText);
+                    if (res.success === false) {
+                        alert(res.error);
+                        e.preventDefault();
+                    } else {
+                        location.reload();
+                    }
+                }
+            };
             fetch('/api/articles', {
                 method: 'get'
             })
                     .then(res => res.json())
                     .then(function (data) {
+                        if (data.success === false) {
+                            throw data.error;
+                        }
                         console.log('Get articles request succeeded with JSON response', data);
 
-                        data.sort(function (a, b) {
+                        data.body.sort(function (a, b) {
                             if (a.id > b.id) {
                                 return 1;
                             }
@@ -181,12 +182,12 @@
                             return 0;
                         });
 
-                        for (let index = 0; index < data.length; index++) {
+                        for (let index = 0; index < data.body.length; index++) {
                             let div = document.createElement("DIV");
                             let b = document.createElement("B");
                             let articleName = document.createElement("SPAN");
-                            b.appendChild(document.createTextNode(data[index].id + " "));
-                            articleName.appendChild(document.createTextNode(data[index].name));
+                            b.appendChild(document.createTextNode(data.body[index].id + " "));
+                            articleName.appendChild(document.createTextNode(data.body[index].name));
                             div.appendChild(b);
                             div.appendChild(articleName);
                             articlesName.appendChild(div);
@@ -200,33 +201,95 @@
             document.getElementById("deleteAll").style.display = 'table';
             document.getElementById("filter").style.display = 'table';
             document.getElementById("addOperation").style.display = 'table';
+            document.getElementById("deletingAll").onclick = function () {
+                xhr.open("DELETE", "/api/balance/operations", false);
+                xhr.send();
+                location.reload();
+            };
+            document.getElementById("addingOperation").onclick = function (e) {
+                let oArticle = document.getElementById("articlesInput").value;
+                let oDeb = document.getElementById("operationDebit").value;
+                let oCred = document.getElementById("operationCredit").value;
+
+                xhr.open("POST", "/api/balance/operations?article=" + oArticle + "&debit=" + oDeb + "&credit=" + oCred, false);
+                xhr.send();
+                let res = JSON.parse(xhr.responseText);
+                if (res.success === false) {
+                    alert(res.error);
+                    e.preventDefault();
+                } else {
+                    location.reload()
+                }
+            };
             fetch('/api/balance/operations', {
                 method: 'get'
             })
                     .then(res => res.json())
                     .then(function (data) {
+                        if (data.success === false) {
+                            throw data.error;
+                        }
                         console.log('Get operations request succeeded with JSON response', data);
 
                         let tbody = table.getElementsByTagName("TBODY")[0];
-
-                        for (let index = 0; index < data.length; index++) {
+                        for (let index = 0; index < data.body.length; index++) {
                             let row = document.createElement("TR");
                             let td = document.createElement("TD");
-                            td.appendChild(document.createTextNode(data[index].id));
+                            td.appendChild(document.createTextNode(data.body[index].id));
                             row.appendChild(td);
                             td = document.createElement("TD");
-                            td.appendChild(document.createTextNode(data[index].articleName));
+                            td.appendChild(document.createTextNode(data.body[index].article.name));
                             row.appendChild(td);
                             td = document.createElement("TD");
-                            td.appendChild(document.createTextNode(data[index].debit));
+                            td.appendChild(document.createTextNode(data.body[index].debit));
                             row.appendChild(td);
                             td = document.createElement("TD");
-                            td.appendChild(document.createTextNode(data[index].credit));
+                            td.appendChild(document.createTextNode(data.body[index].credit));
                             row.appendChild(td);
                             td = document.createElement("TD");
-                            td.appendChild(document.createTextNode(data[index].create_date));
+                            td.appendChild(document.createTextNode(data.body[index].create_date));
                             row.appendChild(td);
-
+                            let button = document.createElement("input");
+                            button.type = "submit";
+                            button.value = "delete";
+                            button.onclick = function () {
+                                let xhr = new XMLHttpRequest();
+                                xhr.open("DELETE", "/api/balance/operations/" + data.body[index].id, false);
+                                xhr.send();
+                                location.reload();
+                            };
+                            row.appendChild(button);
+                            row.style.height = "35px";
+                            button = document.createElement("input");
+                            button.type = "submit";
+                            button.value = "edit";
+                            button.onclick = function () {
+                                button.disabled = true;
+                                td = document.createElement("TD");
+                                let input = document.getElementById("articlesInput");
+                                let articlesInput = input.cloneNode(true);
+                                articlesInput.id = "newArticleInput";
+                                td.appendChild(articlesInput);
+                                let debitInput = document.createElement("input");
+                                debitInput.type = "text";
+                                debitInput.placeholder = "Enter Debit";
+                                td.appendChild(debitInput);
+                                let creditInput = debitInput.cloneNode(true);
+                                creditInput.placeholder = "Enter Credit";
+                                td.appendChild(creditInput);
+                                let editButton = document.createElement("input");
+                                editButton.type = "submit";
+                                editButton.value = "editing";
+                                editButton.onclick = function () {
+                                    let xhr = new XMLHttpRequest();
+                                    xhr.open("PATCH", "/api/balance/operations/" + data.body[index].id + "?article=" + articlesInput.value + "&debit=" + debitInput.value + "&credit=" + creditInput.value, false);
+                                    xhr.send();
+                                    location.reload();
+                                };
+                                td.appendChild(editButton);
+                                row.appendChild(td);
+                            };
+                            row.appendChild(button);
                             tbody.appendChild(row);
                         }
                     })
@@ -240,22 +303,25 @@
             })
                     .then(res => res.json())
                     .then(function (data) {
+                        if (data.success === false) {
+                            throw data.error;
+                        }
                         console.log('Get balance request succeeded with JSON response', data);
 
                         let div = document.createElement("DIV");
                         div.appendChild(document.createTextNode("Balance:"));
                         balance.appendChild(div);
                         div = document.createElement("DIV");
-                        div.appendChild(document.createTextNode("Date: " + data.create_date));
+                        div.appendChild(document.createTextNode("Date: " + data.body.create_date));
                         balance.appendChild(div);
                         div = document.createElement("DIV");
-                        div.appendChild(document.createTextNode("Debit: " + data.debit));
+                        div.appendChild(document.createTextNode("Debit: " + data.body.debit));
                         balance.appendChild(div);
                         div = document.createElement("DIV");
-                        div.appendChild(document.createTextNode("Credit: " + data.credit));
+                        div.appendChild(document.createTextNode("Credit: " + data.body.credit));
                         balance.appendChild(div);
                         div = document.createElement("DIV");
-                        div.appendChild(document.createTextNode("Amount: " + data.amount));
+                        div.appendChild(document.createTextNode("Amount: " + data.body.amount));
                         balance.appendChild(div);
                     })
                     .catch(function (error) {
@@ -264,6 +330,5 @@
         }
     }
 </script>
-
 </body>
 </html>

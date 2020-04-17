@@ -1,5 +1,6 @@
 package server.entities;
 
+import com.google.gson.annotations.Expose;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
@@ -11,13 +12,18 @@ public class Balance
 {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Expose
   private Long id;
 
   @CreationTimestamp
+  @Expose
   private Timestamp create_date;
 
+  @Expose
   private Double credit;
+  @Expose
   private Double debit;
+  @Expose
   private Double amount;
 
   public Balance()

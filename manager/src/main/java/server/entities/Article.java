@@ -1,5 +1,7 @@
 package server.entities;
 
+import com.google.gson.annotations.Expose;
+
 import javax.persistence.*;
 
 @Entity
@@ -8,9 +10,11 @@ public class Article
 {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Expose
   private Long id;
 
   @Column(unique = true)
+  @Expose
   private String name;
 
   public Article()
