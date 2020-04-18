@@ -10,6 +10,45 @@
             border: 1px solid #999;
             padding: 5px;
         }
+
+        .table_sort table {
+            border-collapse: collapse;
+        }
+
+        .table_sort th {
+            color: #ffebcd;
+            background: #008b8b;
+            cursor: pointer;
+        }
+
+        .table_sort td,
+        .table_sort th {
+            padding: 5px;
+            border: 2px solid #846868;
+        }
+
+        .table_sort tbody tr:nth-child(even) {
+            background: #e3e3e3;
+        }
+
+        th.sorted[data-order="1"],
+        th.sorted[data-order="-1"] {
+            position: relative;
+        }
+
+        th.sorted[data-order="1"]::after,
+        th.sorted[data-order="-1"]::after {
+            right: 8px;
+            position: absolute;
+        }
+
+        th.sorted[data-order="-1"]::after {
+            content: "▼"
+        }
+
+        th.sorted[data-order="1"]::after {
+            content: "▲"
+        }
     </style>
 </head>
 
@@ -44,17 +83,15 @@
     <button type="submit" id="addingOperation">Add</button>
 </div>
 
-<!--<div>-->
-<form method="post" action="filter" id="filter" style="display: none">
-    <!--        <label>-->
-    <!--            <input type=text list=articles name="articles">-->
-    <!--        </label>-->
-    <!--        <datalist id=articles></datalist>-->
-    <!--        <button type="submit">Find</button>-->
-</form>
-<!--</div>-->
+<div id="filter" style="margin-top: 10px; display: none">
+    <label>
+        <input type=text list=articles name="articles" id="filterArticle">
+    </label>
+    <datalist id=articles></datalist>
+    <button type="submit" id="filtering">Find</button>
+</div>
 
-<div id="deleteAll" style="display: none">
+<div id="deleteAll" style="margin-top: 10px; display: none">
     <button type="submit" id="deletingAll">deleteAll</button>
 </div>
 
@@ -75,17 +112,17 @@
     <button type="submit" id="changingArticle">Change Article</button>
 </div>
 
-<div id="articlesName"></div>
+<div id="articlesName" style="margin-top: 10px; display: none"></div>
 
 <div>
-    <table id="operations" style="margin-top: 10px; display: none">
+    <table id="operations" style="margin-top: 10px; display: none" class="table_sort">
         <thead>
         <tr>
-            <th>ID</th>
-            <th>Article Name</th>
-            <th>Debit</th>
-            <th>Credit</th>
-            <th>Create Date</th>
+            <th style="white-space: pre-wrap">ID       </th>
+            <th style="white-space: pre-wrap">Article Name       </th>
+            <th style="white-space: pre-wrap">Debit       </th>
+            <th style="white-space: pre-wrap">Credit       </th>
+            <th style="white-space: pre-wrap">Create Date       </th>
         </tr>
         </thead>
         <tbody></tbody>
@@ -126,6 +163,7 @@
                     console.log('Request failed', error);
                 });
         if (isAdmin) {
+            articlesName.style.display = "block";
             document.getElementById("addArticle").style.display = 'block';
             document.getElementById("changeArticle").style.display = 'block';
             document.getElementById("addingArticle").onclick = function (e) {
@@ -172,16 +210,6 @@
                         }
                         console.log('Get articles request succeeded with JSON response', data);
 
-                        data.body.sort(function (a, b) {
-                            if (a.id > b.id) {
-                                return 1;
-                            }
-                            if (a.id < b.id) {
-                                return -1;
-                            }
-                            return 0;
-                        });
-
                         for (let index = 0; index < data.body.length; index++) {
                             let div = document.createElement("DIV");
                             let b = document.createElement("B");
@@ -197,10 +225,36 @@
                         console.log('Request failed', error);
                     });
         } else {
-            document.getElementById("operations").style.display = 'table';
-            document.getElementById("deleteAll").style.display = 'table';
-            document.getElementById("filter").style.display = 'table';
-            document.getElementById("addOperation").style.display = 'table';
+            document.getElementById("deleteAll").style.display = 'block';
+            document.getElementById("filter").style.display = 'block';
+            document.getElementById("addOperation").style.display = 'block';
+            document.getElementById("filtering").onclick = function (e) {
+                let filter = document.getElementById("filterArticle");
+                if (filter.value === "") {
+                    resetTable(table);
+                    return;
+                }
+                fetch('/api/balance/operations?article=' + filter.value, {
+                    method: 'get'
+                })
+                        .then(res => res.json())
+                        .then(function (data) {
+                            if (data.success === false) {
+                                throw data.error;
+                            }
+                            console.log('Get posts in filter request succeeded with JSON response', data);
+                            let tbody = table.getElementsByTagName("TBODY")[0];
+
+                            setElementsToTable(table, data);
+
+                            filter.value = "";
+                        })
+                        .catch(function (error) {
+                            alert(error);
+                            console.log('Request failed', error);
+                            e.preventDefault();
+                        });
+            };
             document.getElementById("deletingAll").onclick = function () {
                 xhr.open("DELETE", "/api/balance/operations", false);
                 xhr.send();
@@ -221,82 +275,8 @@
                     location.reload()
                 }
             };
-            fetch('/api/balance/operations', {
-                method: 'get'
-            })
-                    .then(res => res.json())
-                    .then(function (data) {
-                        if (data.success === false) {
-                            throw data.error;
-                        }
-                        console.log('Get operations request succeeded with JSON response', data);
 
-                        let tbody = table.getElementsByTagName("TBODY")[0];
-                        for (let index = 0; index < data.body.length; index++) {
-                            let row = document.createElement("TR");
-                            let td = document.createElement("TD");
-                            td.appendChild(document.createTextNode(data.body[index].id));
-                            row.appendChild(td);
-                            td = document.createElement("TD");
-                            td.appendChild(document.createTextNode(data.body[index].article.name));
-                            row.appendChild(td);
-                            td = document.createElement("TD");
-                            td.appendChild(document.createTextNode(data.body[index].debit));
-                            row.appendChild(td);
-                            td = document.createElement("TD");
-                            td.appendChild(document.createTextNode(data.body[index].credit));
-                            row.appendChild(td);
-                            td = document.createElement("TD");
-                            td.appendChild(document.createTextNode(data.body[index].create_date));
-                            row.appendChild(td);
-                            let button = document.createElement("input");
-                            button.type = "submit";
-                            button.value = "delete";
-                            button.onclick = function () {
-                                let xhr = new XMLHttpRequest();
-                                xhr.open("DELETE", "/api/balance/operations/" + data.body[index].id, false);
-                                xhr.send();
-                                location.reload();
-                            };
-                            row.appendChild(button);
-                            row.style.height = "35px";
-                            button = document.createElement("input");
-                            button.type = "submit";
-                            button.value = "edit";
-                            button.onclick = function () {
-                                button.disabled = true;
-                                td = document.createElement("TD");
-                                let input = document.getElementById("articlesInput");
-                                let articlesInput = input.cloneNode(true);
-                                articlesInput.id = "newArticleInput";
-                                td.appendChild(articlesInput);
-                                let debitInput = document.createElement("input");
-                                debitInput.type = "text";
-                                debitInput.placeholder = "Enter Debit";
-                                td.appendChild(debitInput);
-                                let creditInput = debitInput.cloneNode(true);
-                                creditInput.placeholder = "Enter Credit";
-                                td.appendChild(creditInput);
-                                let editButton = document.createElement("input");
-                                editButton.type = "submit";
-                                editButton.value = "editing";
-                                editButton.onclick = function () {
-                                    let xhr = new XMLHttpRequest();
-                                    xhr.open("PATCH", "/api/balance/operations/" + data.body[index].id + "?article=" + articlesInput.value + "&debit=" + debitInput.value + "&credit=" + creditInput.value, false);
-                                    xhr.send();
-                                    location.reload();
-                                };
-                                td.appendChild(editButton);
-                                row.appendChild(td);
-                            };
-                            row.appendChild(button);
-                            tbody.appendChild(row);
-                        }
-                    })
-                    .catch(function (error) {
-                        table.style.display = 'none';
-                        console.log('Request failed', error);
-                    });
+            resetTable(table);
 
             fetch('/api/balance', {
                 method: 'get'
@@ -328,7 +308,130 @@
                         console.log('Request failed', error);
                     });
         }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const getSort = ({target}) => {
+            const order = (target.dataset.order = -(target.dataset.order || -1));
+            const index = [...target.parentNode.cells].indexOf(target);
+            const collator = new Intl.Collator(['en', 'ru'], {numeric: true});
+            const comparator = (index, order) => (a, b) => order * collator.compare(
+                    a.children[index].innerHTML,
+                    b.children[index].innerHTML
+            );
+
+            for (const tBody of target.closest('table').tBodies)
+                tBody.append(...[...tBody.rows].sort(comparator(index, order)));
+
+            for (const cell of target.parentNode.cells)
+                cell.classList.toggle('sorted', cell === target);
+        };
+
+        document.querySelectorAll('.table_sort thead').forEach(tableTH => tableTH.addEventListener('click', () => getSort(event)));
+
+    });
+
+    function resetTable(table) {
+
+        fetch('/api/balance/operations', {
+            method: 'get'
+        })
+                .then(res => res.json())
+                .then(function (data) {
+                    if (data.success === false) {
+                        throw data.error;
+                    }
+                    console.log('Get operations request succeeded with JSON response', data);
+                    setElementsToTable(table, data);
+                })
+                .catch(function (error) {
+                    table.style.display = 'none';
+                    console.log('Request failed', error);
+                });
+
+
     }
+
+    function setElementsToTable(table, req) {
+        if (req == null) {
+            return;
+        }
+
+        let tbody = table.getElementsByTagName("TBODY")[0];
+        while (tbody.firstChild) {
+            tbody.firstChild.remove();
+        }
+
+        for (let index = 0; index < req.body.length; index++) {
+            let row = document.createElement("TR");
+            let td = document.createElement("TD");
+            td.appendChild(document.createTextNode(req.body[index].id));
+            row.appendChild(td);
+            td = document.createElement("TD");
+            td.appendChild(document.createTextNode(req.body[index].article.name));
+            row.appendChild(td);
+            td = document.createElement("TD");
+            td.appendChild(document.createTextNode(req.body[index].debit));
+            row.appendChild(td);
+            td = document.createElement("TD");
+            td.appendChild(document.createTextNode(req.body[index].credit));
+            row.appendChild(td);
+            td = document.createElement("TD");
+            td.appendChild(document.createTextNode(req.body[index].create_date));
+            row.appendChild(td);
+            let button = document.createElement("input");
+            button.type = "submit";
+            button.value = "delete";
+            button.style.height = "40px";
+            button.onclick = function () {
+                let xhr = new XMLHttpRequest();
+                xhr.open("DELETE", "/api/balance/operations/" + req.body[index].id, false);
+                xhr.send();
+                location.reload();
+            };
+            row.appendChild(button);
+            row.style.height = "35px";
+            button = document.createElement("input");
+            button.type = "submit";
+            button.value = "edit";
+            button.style.height = "40px";
+            button.onclick = function () {
+                button.disabled = true;
+                td = document.createElement("TD");
+                let input = document.getElementById("articlesInput");
+                let articlesInput = input.cloneNode(true);
+                articlesInput.id = "newArticleInput";
+                articlesInput.style.height = "30px";
+                td.appendChild(articlesInput);
+                let debitInput = document.createElement("input");
+                debitInput.type = "text";
+                debitInput.placeholder = "Enter Debit";
+                debitInput.style.height = "30px";
+                td.appendChild(debitInput);
+                let creditInput = debitInput.cloneNode(true);
+                creditInput.placeholder = "Enter Credit";
+                creditInput.style.height = "30px";
+                td.appendChild(creditInput);
+                let editButton = document.createElement("input");
+                editButton.type = "submit";
+                editButton.value = "editing";
+                editButton.style.height = "30px";
+                editButton.onclick = function () {
+                    let xhr = new XMLHttpRequest();
+                    xhr.open("PATCH", "/api/balance/operations/" + req.body[index].id + "?article=" + articlesInput.value + "&debit=" + debitInput.value + "&credit=" + creditInput.value, false);
+                    xhr.send();
+                    location.reload();
+                };
+                td.appendChild(editButton);
+                row.appendChild(td);
+            };
+            row.appendChild(button);
+            tbody.appendChild(row);
+        }
+        document.getElementById("operations").style.display = 'table';
+    }
+
 </script>
 </body>
 </html>

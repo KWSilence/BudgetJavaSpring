@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import server.entities.*;
 import server.repos.ArticleRepo;
@@ -12,6 +13,7 @@ import server.repos.OperationRepo;
 import server.repos.UserRepo;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -28,15 +30,18 @@ public class ManagerController
 
   private final ArticleRepo articleRepo;
 
+  private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
   private Gson gson;
 
   public ManagerController(OperationRepo operationRepo, UserRepo userRepo, BalanceRepo balanceRepo,
-                           ArticleRepo articleRepo)
+                           ArticleRepo articleRepo, BCryptPasswordEncoder bCryptPasswordEncoder)
   {
     this.operationRepo = operationRepo;
     this.userRepo = userRepo;
     this.balanceRepo = balanceRepo;
     this.articleRepo = articleRepo;
+    this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     this.gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
   }
 
@@ -210,6 +215,36 @@ public class ManagerController
       return gson.toJson(new Response("This article name already used", false));
     }
     articleRepo.save(new Article(article));
+    return gson.toJson(new Response());
+  }
+
+  @PostMapping("/registration")
+  public String addUser(@RequestParam String username, @RequestParam String password)
+  {
+    if (username.trim().isEmpty())
+    {
+      return gson.toJson(new Response("Enter username", false));
+    }
+    if (password.trim().isEmpty())
+    {
+      return gson.toJson(new Response("Enter password", false));
+    }
+
+    if (userRepo.findByUsername(username) != null)
+    {
+      return gson.toJson(new Response("This user already exist", false));
+    }
+
+    Balance balance = new Balance();
+    balanceRepo.save(balance);
+    User user = new User();
+    user.setUsername(username);
+    user.setActive(true);
+    user.setPassword(bCryptPasswordEncoder.encode(password));
+    user.setRoles(Collections.singleton(Role.USER));
+    user.setBalance(balance);
+    userRepo.save(user);
+
     return gson.toJson(new Response());
   }
 
