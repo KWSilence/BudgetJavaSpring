@@ -225,10 +225,8 @@
             let articlesTable = document.getElementById("articlesForAdmin");
             let usersTable = document.getElementById("usersForAdmin");
             let operationsTable = document.getElementById("operationsForAdmin");
-            document.getElementById("articlesForAdmin").style.display = 'table';
             tableName.addEventListener('change', function () {
                 if (tableName.value === 'articles') {
-                    articlesTable.style.display = 'table';
                     operationsTable.style.display = 'none';
                     deleteTableBody(operationsTable);
                     usersTable.style.display = 'none';
@@ -254,6 +252,7 @@
                                     row.appendChild(td);
                                     tbody.appendChild(row);
                                 }
+                                articlesTable.style.display = 'table';
                             })
                             .catch(function (error) {
                                 articlesTable.style.display = 'none';
@@ -261,7 +260,6 @@
                             });
                 }
                 if (tableName.value === 'users') {
-                    usersTable.style.display = 'table';
                     operationsTable.style.display = 'none';
                     deleteTableBody(operationsTable);
                     articlesTable.style.display = 'none';
@@ -293,6 +291,11 @@
                                     row.appendChild(td);
                                     tbody.appendChild(row);
                                 }
+                                console.log(tbody.childElementCount);
+                                if (tbody.childElementCount > 0)
+                                {
+                                    usersTable.style.display = 'table';
+                                }
                             })
                             .catch(function (error) {
                                 usersTable.style.display = 'none';
@@ -300,7 +303,6 @@
                             });
                 }
                 if (tableName.value === 'operations') {
-                    operationsTable.style.display = 'table';
                     articlesTable.style.display = 'none';
                     deleteTableBody(articlesTable);
                     usersTable.style.display = 'none';
@@ -338,6 +340,7 @@
                                     row.appendChild(td);
                                     tbody.appendChild(row);
                                 }
+                                operationsTable.style.display = 'table';
                             })
                             .catch(function (error) {
                                 operationsTable.style.display = 'none';
@@ -401,6 +404,7 @@
                             row.appendChild(articleName);
                             tbody.appendChild(row);
                         }
+                        document.getElementById("articlesForAdmin").style.display = 'table';
                     })
                     .catch(function (error) {
                         console.log('Request failed', error);
