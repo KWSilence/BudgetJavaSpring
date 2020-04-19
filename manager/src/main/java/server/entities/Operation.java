@@ -30,6 +30,7 @@ public class Operation
 
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "balance_id")
+  @Expose
   private Balance balance;
 
   public Operation(Article article, Double debit, Double credit, Balance balance)
