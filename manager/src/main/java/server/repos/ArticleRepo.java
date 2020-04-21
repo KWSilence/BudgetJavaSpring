@@ -1,13 +1,11 @@
 package server.repos;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import server.entities.Article;
 
-import java.util.List;
-
 @Repository
-public interface ArticleRepo extends CrudRepository<Article, Long>
+public interface ArticleRepo extends JpaRepository<Article, Long>
 {
-  List<Article> findByName(String name);
+  Article findByName(String name);
 }

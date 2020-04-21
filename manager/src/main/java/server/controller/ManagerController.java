@@ -7,10 +7,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import server.entities.*;
-import server.repos.ArticleRepo;
-import server.repos.BalanceRepo;
-import server.repos.OperationRepo;
-import server.repos.UserRepo;
+import server.repos.*;
+import server.service.ArticleService;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,19 +26,19 @@ public class ManagerController
 
   private final BalanceRepo balanceRepo;
 
-  private final ArticleRepo articleRepo;
+  private final ArticleService articleService;
 
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
   private Gson gson;
 
   public ManagerController(OperationRepo operationRepo, UserRepo userRepo, BalanceRepo balanceRepo,
-                           ArticleRepo articleRepo, BCryptPasswordEncoder bCryptPasswordEncoder)
+                           ArticleService articleService, BCryptPasswordEncoder bCryptPasswordEncoder)
   {
     this.operationRepo = operationRepo;
     this.userRepo = userRepo;
     this.balanceRepo = balanceRepo;
-    this.articleRepo = articleRepo;
+    this.articleService = articleService;
     this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     this.gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
   }
@@ -151,29 +149,34 @@ public class ManagerController
   public String readArticles(@RequestParam(required = false) String article,
                              @RequestParam(required = false) Long articleID)
   {
-    List<Article> articles = new ArrayList<>();
-    boolean readed = false;
-    if (article != null && !article.isEmpty())
+    try
     {
-      articles = articleRepo.findByName(article);
-      readed = true;
-    }
-    if (articleID != null)
-    {
-      if (readed)
+      List<Article> articles = new ArrayList<>();
+      boolean readed = false;
+      if (articleID != null)
       {
-        return gson.toJson(new Response("Search should be by ID or by Name", false));
+        articles.add(articleService.getById(articleID));
+        readed = true;
       }
-      Optional<Article> findArticle = articleRepo.findById(articleID);
-      findArticle.ifPresent(articles::add);
-      readed = true;
+      if (article != null)
+      {
+        if (readed)
+        {
+          throw new MException("Search should be by ID or by Name");
+        }
+        articles.add(articleService.getByName(article));
+        readed = true;
+      }
+      if (!readed)
+      {
+        articles = articleService.getAll();
+      }
+      return gson.toJson(new Response(articles));
     }
-    if (!readed)
+    catch (MException e)
     {
-      articles = (List<Article>) articleRepo.findAll();
+      return gson.toJson(new Response(e.getMessage(), false));
     }
-    return articles != null && !articles.isEmpty() ? gson.toJson(new Response(articles))
-                                                   : gson.toJson(new Response("Articles not found", false));
   }
 
   @PostMapping("/balance/operations")
@@ -181,41 +184,47 @@ public class ManagerController
                              @RequestParam(required = false, defaultValue = "0.0") Double debit,
                              @RequestParam(required = false, defaultValue = "0.0") Double credit)
   {
-    List<Article> findArticle = articleRepo.findByName(article);
-    if (findArticle.isEmpty())
+    try
     {
-      return gson.toJson(new Response("This Article name not found", false));
-    }
-    if (debit < 0 || credit < 0)
-    {
-      return gson.toJson(new Response("Debit and Credit should be positive", false));
-    }
+      Article findArticle = articleService.getByName(article);
+      if (debit < 0 || credit < 0)
+      {
+        return gson.toJson(new Response("Debit and Credit should be positive", false));
+      }
 
-    if (debit.toString().indexOf('.') > 3 || credit.toString().indexOf('.') > 3)
-    {
-      return gson.toJson(new Response("Debit and Credit should be format *.00", false));
-    }
+      if (debit.toString().indexOf('.') > 3 || credit.toString().indexOf('.') > 3)
+      {
+        return gson.toJson(new Response("Debit and Credit should be format *.00", false));
+      }
 
-    Balance balance = userRepo.findById(userUp.getId()).get().getBalance();
-    Operation operation = new Operation(findArticle.get(0), debit, credit, balance);
-    operationRepo.save(operation);
-    balance.changeDebit(debit);
-    balance.changeCredit(credit);
-    balance.updateAmount();
-    balanceRepo.save(balance);
-    return gson.toJson(new Response());
+      Balance balance = userRepo.findById(userUp.getId()).get().getBalance();
+      Operation operation = new Operation(findArticle, debit, credit, balance);
+      operationRepo.save(operation);
+      balance.changeDebit(debit);
+      balance.changeCredit(credit);
+      balance.updateAmount();
+      balanceRepo.save(balance);
+      return gson.toJson(new Response());
+    }
+    catch (MException e)
+    {
+      return gson.toJson(new Response(e.getMessage(), false));
+    }
   }
 
   @PostMapping("/articles")
   @PreAuthorize("hasAuthority('ADMIN')")
   public String addArticle(@RequestParam String article)
   {
-    if (!articleRepo.findByName(article).isEmpty())
+    try
     {
-      return gson.toJson(new Response("This article name already used", false));
+      articleService.addOrUpdate(new Article(article));
+      return gson.toJson(new Response());
     }
-    articleRepo.save(new Article(article));
-    return gson.toJson(new Response());
+    catch (MException e)
+    {
+      return gson.toJson(new Response(e.getMessage(), false));
+    }
   }
 
   @PostMapping("/registration")
@@ -252,21 +261,17 @@ public class ManagerController
   @PreAuthorize("hasAuthority('ADMIN')")
   public String changeArticle(@PathVariable Long id, @RequestParam String article)
   {
-    Optional<Article> findArticle = articleRepo.findById(id);
-    if (findArticle.isEmpty())
+    try
     {
-      return gson.toJson(new Response("Article by this id not found", false));
+      Article findArticle = articleService.getById(id);
+      findArticle.setName(article);
+      articleService.addOrUpdate(findArticle);
+      return gson.toJson(new Response());
     }
-
-    if (!articleRepo.findByName(article).isEmpty())
+    catch (MException e)
     {
-      return gson.toJson(new Response("This article name already used", false));
+      return gson.toJson(new Response(e.getMessage(), false));
     }
-    Article newArticle = findArticle.get();
-    newArticle.setName(article);
-    articleRepo.save(newArticle);
-
-    return gson.toJson(new Response());
   }
 
   @PatchMapping("/balance/operations/{id}")
@@ -275,37 +280,44 @@ public class ManagerController
                                 @RequestParam(required = false, defaultValue = "-1.0") Double debit,
                                 @RequestParam(required = false, defaultValue = "-1.0") Double credit)
   {
-    List<Operation> operations = operationRepo.findByBalance(userRepo.findById(userUp.getId()).get().getBalance());
-    operations = operations.stream().filter(o -> o.getId().equals(id)).collect(Collectors.toList());
-    if (operations.isEmpty())
+    try
     {
-      return gson.toJson(new Response("Operation by this id not found", false));
-    }
-    Operation operation = operations.get(0);
-    List<Article> articleList = articleRepo.findByName(article);
-    if (article != null && !articleList.isEmpty())
-    {
-      operation.setArticle(articleList.get(0));
-    }
-    double debitChange = 0.0, creditChange = 0.0;
-    if (debit >= 0 && debit.toString().indexOf('.') < 4)
-    {
-      debitChange = debit - operation.getDebit();
-      operation.setDebit(debit);
-    }
-    if (credit >= 0 && credit.toString().indexOf('.') < 4)
-    {
-      creditChange = credit - operation.getCredit();
-      operation.setCredit(credit);
-    }
+      List<Operation> operations = operationRepo.findByBalance(userRepo.findById(userUp.getId()).get().getBalance());
+      operations = operations.stream().filter(o -> o.getId().equals(id)).collect(Collectors.toList());
+      if (operations.isEmpty())
+      {
+        return gson.toJson(new Response("Operation by this id not found", false));
+      }
+      Operation operation = operations.get(0);
+      if (article != null)
+      {
+        Article findArticle = articleService.getByName(article);
+        operation.setArticle(findArticle);
+      }
+      double debitChange = 0.0, creditChange = 0.0;
+      if (debit >= 0 && debit.toString().indexOf('.') < 4)
+      {
+        debitChange = debit - operation.getDebit();
+        operation.setDebit(debit);
+      }
+      if (credit >= 0 && credit.toString().indexOf('.') < 4)
+      {
+        creditChange = credit - operation.getCredit();
+        operation.setCredit(credit);
+      }
 
-    Balance balance = userRepo.findById(userUp.getId()).get().getBalance();
-    balance.changeDebit(debitChange);
-    balance.changeCredit(creditChange);
-    balance.updateAmount();
-    balanceRepo.save(balance);
-    operationRepo.save(operation);
-    return gson.toJson(new Response());
+      Balance balance = userRepo.findById(userUp.getId()).get().getBalance();
+      balance.changeDebit(debitChange);
+      balance.changeCredit(creditChange);
+      balance.updateAmount();
+      balanceRepo.save(balance);
+      operationRepo.save(operation);
+      return gson.toJson(new Response());
+    }
+    catch (MException e)
+    {
+      return gson.toJson(new Response(e.getMessage(), false));
+    }
   }
 
   @DeleteMapping("/balance/operations/{id}")
