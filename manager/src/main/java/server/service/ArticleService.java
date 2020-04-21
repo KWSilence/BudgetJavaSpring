@@ -46,13 +46,13 @@ public class ArticleService
     return articles;
   }
 
-  public boolean isExistById(Long id)
+  private boolean isExistById(Long id)
   {
     Optional<Article> article = repository.findById(id);
     return article.isPresent();
   }
 
-  public boolean isExistByName(String name)
+  private boolean isExistByName(String name)
   {
     Article article = repository.findByName(name);
     return (article != null);

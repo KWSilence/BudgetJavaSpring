@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import server.entities.*;
 import server.repos.*;
 import server.service.ArticleService;
+import server.service.BalanceService;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,7 +25,7 @@ public class ManagerController
 
   private final UserRepo userRepo;
 
-  private final BalanceRepo balanceRepo;
+  private final BalanceService balanceService;
 
   private final ArticleService articleService;
 
@@ -32,12 +33,12 @@ public class ManagerController
 
   private Gson gson;
 
-  public ManagerController(OperationRepo operationRepo, UserRepo userRepo, BalanceRepo balanceRepo,
+  public ManagerController(OperationRepo operationRepo, UserRepo userRepo, BalanceService balanceService,
                            ArticleService articleService, BCryptPasswordEncoder bCryptPasswordEncoder)
   {
     this.operationRepo = operationRepo;
     this.userRepo = userRepo;
-    this.balanceRepo = balanceRepo;
+    this.balanceService = balanceService;
     this.articleService = articleService;
     this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     this.gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
@@ -68,7 +69,7 @@ public class ManagerController
   public String readOperations(@AuthenticationPrincipal User userUp, @RequestParam(required = false) String article,
                                @RequestParam(required = false) Long id)
   {
-    List<Operation> operations = this.operationRepo.findByBalance(userRepo.findById(userUp.getId()).get().getBalance());
+    List<Operation> operations = this.operationRepo.findByBalance(userUp.getBalance());
     if (article != null && !article.isEmpty())
     {
       operations = operations.stream().filter(o -> o.getArticleName().equals(article)).collect(Collectors.toList());
@@ -197,13 +198,13 @@ public class ManagerController
         return gson.toJson(new Response("Debit and Credit should be format *.00", false));
       }
 
-      Balance balance = userRepo.findById(userUp.getId()).get().getBalance();
+      Balance balance = userUp.getBalance();
       Operation operation = new Operation(findArticle, debit, credit, balance);
       operationRepo.save(operation);
       balance.changeDebit(debit);
       balance.changeCredit(credit);
       balance.updateAmount();
-      balanceRepo.save(balance);
+      balanceService.addOrUpdate(balance);
       return gson.toJson(new Response());
     }
     catch (MException e)
@@ -245,7 +246,7 @@ public class ManagerController
     }
 
     Balance balance = new Balance();
-    balanceRepo.save(balance);
+    balanceService.addOrUpdate(balance);
     User user = new User();
     user.setUsername(username);
     user.setActive(true);
@@ -282,14 +283,14 @@ public class ManagerController
   {
     try
     {
-      List<Operation> operations = operationRepo.findByBalance(userRepo.findById(userUp.getId()).get().getBalance());
+      List<Operation> operations = operationRepo.findByBalance(userUp.getBalance());
       operations = operations.stream().filter(o -> o.getId().equals(id)).collect(Collectors.toList());
       if (operations.isEmpty())
       {
         return gson.toJson(new Response("Operation by this id not found", false));
       }
       Operation operation = operations.get(0);
-      if (article != null)
+      if (article != null && !article.trim().isEmpty())
       {
         Article findArticle = articleService.getByName(article);
         operation.setArticle(findArticle);
@@ -306,16 +307,17 @@ public class ManagerController
         operation.setCredit(credit);
       }
 
-      Balance balance = userRepo.findById(userUp.getId()).get().getBalance();
+      Balance balance = userUp.getBalance();
       balance.changeDebit(debitChange);
       balance.changeCredit(creditChange);
       balance.updateAmount();
-      balanceRepo.save(balance);
+      balanceService.addOrUpdate(balance);
       operationRepo.save(operation);
       return gson.toJson(new Response());
     }
     catch (MException e)
     {
+      System.out.println("FUCK");
       return gson.toJson(new Response(e.getMessage(), false));
     }
   }
@@ -324,18 +326,18 @@ public class ManagerController
   @PreAuthorize("hasAuthority('USER')")
   public String deleteOperation(@AuthenticationPrincipal User userUp, @PathVariable Long id)
   {
-    List<Operation> operations = operationRepo.findByBalance(userRepo.findById(userUp.getId()).get().getBalance());
+    List<Operation> operations = operationRepo.findByBalance(userUp.getBalance());
     operations = operations.stream().filter(o -> o.getId().equals(id)).collect(Collectors.toList());
     if (operations.isEmpty())
     {
       return gson.toJson(new Response("Operation by this id not found", false));
     }
     Operation operation = operations.get(0);
-    Balance balance = userRepo.findById(userUp.getId()).get().getBalance();
+    Balance balance = userUp.getBalance();
     balance.changeDebit(-operation.getDebit());
     balance.changeCredit(-operation.getCredit());
     balance.updateAmount();
-    balanceRepo.save(balance);
+    balanceService.addOrUpdate(balance);
     operationRepo.delete(operation);
     return gson.toJson(new Response());
   }
@@ -343,9 +345,9 @@ public class ManagerController
   @DeleteMapping("/balance/operations")
   public String deleteAllOperation(@AuthenticationPrincipal User userUp)
   {
-    Balance balance = userRepo.findById(userUp.getId()).get().getBalance();
+    Balance balance = userUp.getBalance();
     balance.reset();
-    balanceRepo.save(balance);
+    balanceService.addOrUpdate(balance);
     List<Operation> operations = operationRepo.findByBalance(balance);
     operationRepo.deleteAll(operations);
     return gson.toJson(new Response());
