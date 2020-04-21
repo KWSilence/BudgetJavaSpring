@@ -110,4 +110,14 @@ public class Operation
   {
     return create_date;
   }
+
+  public void changeDebit(Double debit)
+  {
+    this.debit = (this.debit * 100 + debit * 100) / 100;
+  }
+
+  public void changeCredit(Double credit)
+  {
+    this.credit = (this.credit * 100 + credit * 100) / 100;
+  }
 }

@@ -26,7 +26,7 @@ public class User implements UserDetails
   @Expose
   private Set<Role> roles;
 
-  @ManyToOne(fetch = FetchType.EAGER)
+  @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
   @JoinColumn(name = "balance_id")
   @Expose
   private Balance balance;

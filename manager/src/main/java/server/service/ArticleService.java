@@ -52,7 +52,7 @@ public class ArticleService
     return article.isPresent();
   }
 
-  private boolean isExistByName(String name)
+  public boolean isExistByName(String name)
   {
     Article article = repository.findByName(name);
     return (article != null);
