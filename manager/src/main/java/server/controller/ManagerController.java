@@ -62,7 +62,7 @@ public class ManagerController
     {
       return gson.toJson(new Response("Admin have not balance", false));
     }
-    return gson.toJson(new Response(userRepo.findById(userUp.getId()).get().getBalance()));
+    return gson.toJson(new Response(userUp.getBalance()));
   }
 
   @GetMapping("/balance/operations")
@@ -193,11 +193,13 @@ public class ManagerController
         return gson.toJson(new Response("Debit and Credit should be positive", false));
       }
 
-      if (debit.toString().indexOf('.') > 3 || credit.toString().indexOf('.') > 3)
+      String debitStr = debit.toString();
+      String creditStr = credit.toString();
+
+      if ((debitStr.length() - debitStr.indexOf('.')) > 3 || (creditStr.length() - creditStr.indexOf('.')) > 3)
       {
         return gson.toJson(new Response("Debit and Credit should be format *.00", false));
       }
-
       Balance balance = userUp.getBalance();
       Operation operation = new Operation(findArticle, debit, credit, balance);
       operationRepo.save(operation);
@@ -296,12 +298,12 @@ public class ManagerController
         operation.setArticle(findArticle);
       }
       double debitChange = 0.0, creditChange = 0.0;
-      if (debit >= 0 && debit.toString().indexOf('.') < 4)
+      if (debit >= 0 && (debit.toString().length() - debit.toString().indexOf('.')) < 4)
       {
         debitChange = debit - operation.getDebit();
         operation.setDebit(debit);
       }
-      if (credit >= 0 && credit.toString().indexOf('.') < 4)
+      if (credit >= 0 && (credit.toString().length() - credit.toString().indexOf('.')) < 4)
       {
         creditChange = credit - operation.getCredit();
         operation.setCredit(credit);

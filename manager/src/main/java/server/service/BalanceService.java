@@ -20,17 +20,12 @@ public class BalanceService
 
   public Balance getById(Long id) throws MException
   {
-    if (!isExistById(id))
+    Optional<Balance> balance = repository.findById(id);
+    if (balance.isEmpty())
     {
       throw new MException("Balance by this id does not exist");
     }
-    return repository.findById(id).get();
-  }
-
-  private boolean isExistById(Long id)
-  {
-    Optional<Balance> balance = repository.findById(id);
-    return balance.isPresent();
+    return balance.get();
   }
 
   public void addOrUpdate(Balance balance)
