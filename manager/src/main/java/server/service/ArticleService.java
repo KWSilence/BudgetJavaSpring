@@ -27,6 +27,20 @@ public class ArticleService
     return repository.findById(id).get();
   }
 
+  public Article getById(String id) throws MException
+  {
+    long numId;
+    try
+    {
+      numId = Long.parseLong(id);
+    }
+    catch (Exception e)
+    {
+      throw new MException("Article id should be num");
+    }
+    return getById(numId);
+  }
+
   public Article getByName(String name) throws MException
   {
     if (!isExistByName(name))

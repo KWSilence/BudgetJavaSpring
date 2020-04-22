@@ -67,13 +67,15 @@ public class OperationService
   }
 
 
-  public void update(Long id, Article article, Double debit, Double credit, User user) throws MException
+  public void update(Long id, Article article, String debit, String credit, User user) throws MException
   {
     Operation operation = getById(id, user);
-    checkOperation(article, debit, credit);
+    Double numDebit = convertToDouble(debit, "Debit");
+    Double numCredit = convertToDouble(credit, "Credit");
+    checkOperation(article, numDebit, numCredit);
 
-    double debitChange = (debit != null) ? (debit - operation.getDebit()) : 0;
-    double creditChange = (credit != null) ? (credit - operation.getCredit()) : 0;
+    double debitChange = (numDebit != null) ? (numDebit - operation.getDebit()) : 0;
+    double creditChange = (numCredit != null) ? (numCredit - operation.getCredit()) : 0;
     if (article != null)
     {
       operation.setArticle(article);
@@ -89,17 +91,21 @@ public class OperationService
     repository.saveAndFlush(operation);
   }
 
-  public void add(Article article, Double debit, Double credit, User user) throws MException
+  public void add(Article article, String debit, String credit, User user) throws MException
   {
-    checkOperation(article, debit, credit);
+    Double tmp = convertToDouble(debit, "Debit");
+    Double numDebit = (tmp == null) ? 0 : tmp;
+    tmp = convertToDouble(credit, "Credit");
+    Double numCredit = (tmp == null) ? 0 : tmp;
+    checkOperation(article, numDebit, numCredit);
 
     Balance balance = user.getBalance();
-    balance.changeDebit(debit);
-    balance.changeCredit(credit);
+    balance.changeDebit(numDebit);
+    balance.changeCredit(numCredit);
     balance.updateAmount();
     balanceService.addOrUpdate(balance);
 
-    Operation operation = new Operation(article, debit, credit, balance);
+    Operation operation = new Operation(article, numDebit, numCredit, balance);
     repository.saveAndFlush(operation);
   }
 
@@ -124,6 +130,11 @@ public class OperationService
 
   private void checkOperation(Article article, Double debit, Double credit) throws MException
   {
+    if (article != null && (article.getName().trim().isEmpty() || !articleService.isExistByName(article.getName())))
+    {
+      throw new MException("Article name in operation not correct");
+    }
+
     if (credit != null && (credit < 0 || (credit.toString().length() - credit.toString().indexOf('.')) > 3))
     {
       throw new MException("Operation credit not correct(negative or not *.00)");
@@ -133,11 +144,24 @@ public class OperationService
     {
       throw new MException("Operation debit not correct(negative or not *.00)");
     }
+  }
 
-    if (article != null && (article.getName().trim().isEmpty() || !articleService.isExistByName(article.getName())))
+  public Double convertToDouble(String num, String name) throws MException
+  {
+    if (num.trim().isEmpty())
     {
-      throw new MException("Article name in operation not correct");
+      return null;
     }
+    double converted;
+    try
+    {
+      converted = Double.parseDouble(num);
+    }
+    catch (Exception e)
+    {
+      throw new MException(name + " does not content double");
+    }
+    return converted;
   }
 
   public List<Operation> filterByArticleName(String article, List<Operation> operations) throws MException

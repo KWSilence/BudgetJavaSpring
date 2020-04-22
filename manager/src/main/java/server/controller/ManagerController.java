@@ -208,8 +208,8 @@ public class ManagerController
 
   @PostMapping("/balance/operations")
   public String addOperation(@AuthenticationPrincipal User userUp, @RequestParam String article,
-                             @RequestParam(required = false, defaultValue = "0.0") Double debit,
-                             @RequestParam(required = false, defaultValue = "0.0") Double credit)
+                             @RequestParam(required = false) String debit,
+                             @RequestParam(required = false) String credit)
   {
     try
     {
@@ -254,7 +254,7 @@ public class ManagerController
 
   @PatchMapping("/articles/{id}")
   @PreAuthorize("hasAuthority('ADMIN')")
-  public String changeArticle(@PathVariable Long id, @RequestParam String article)
+  public String changeArticle(@PathVariable String id, @RequestParam String article)
   {
     try
     {
@@ -272,8 +272,8 @@ public class ManagerController
   @PatchMapping("/balance/operations/{id}")
   public String changeOperation(@AuthenticationPrincipal User userUp, @PathVariable Long id,
                                 @RequestParam(required = false) String article,
-                                @RequestParam(required = false) Double debit,
-                                @RequestParam(required = false) Double credit)
+                                @RequestParam(required = false) String debit,
+                                @RequestParam(required = false) String credit)
   {
     try
     {
