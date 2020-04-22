@@ -4,19 +4,19 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import server.entities.*;
-import server.repos.*;
+import server.entities.Article;
+import server.entities.Operation;
+import server.entities.Response;
+import server.entities.User;
+import server.repos.MException;
 import server.service.ArticleService;
 import server.service.BalanceService;
 import server.service.OperationService;
+import server.service.UserService;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
@@ -24,36 +24,36 @@ public class ManagerController
 {
   private final OperationService operationService;
 
-  private final UserRepo userRepo;
+  private final UserService userService;
 
   private final BalanceService balanceService;
 
   private final ArticleService articleService;
 
-  private final BCryptPasswordEncoder bCryptPasswordEncoder;
-
   private Gson gson;
 
-  public ManagerController(OperationService operationService, UserRepo userRepo, BalanceService balanceService,
-                           ArticleService articleService, BCryptPasswordEncoder bCryptPasswordEncoder)
+  public ManagerController(OperationService operationService, UserService userService, BalanceService balanceService,
+                           ArticleService articleService)
   {
     this.operationService = operationService;
-    this.userRepo = userRepo;
+    this.userService = userService;
     this.balanceService = balanceService;
     this.articleService = articleService;
-    this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     this.gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
   }
 
   @GetMapping("me")
   public String who(@AuthenticationPrincipal User user)
   {
-    Optional<User> findUser = userRepo.findById(user.getId());
-    if (findUser.isEmpty())
+    try
     {
-      return gson.toJson(new Response("Something wrong", false));
+      return gson.toJson(new Response(userService.getById(user.getId())));
     }
-    return gson.toJson(new Response(findUser.get()));
+    catch (MException e)
+    {
+      return gson.toJson(new Response(e.getMessage(), false));
+    }
+
   }
 
   @GetMapping("/balance")
@@ -100,35 +100,40 @@ public class ManagerController
 
   @GetMapping("/users")
   @PreAuthorize("hasAuthority('ADMIN')")
-  public String readUsers(@RequestParam(required = false) Long userID, @RequestParam(required = false) String username)
+  public String readUsers(@RequestParam(required = false) String username)
   {
-    List<User> users = new ArrayList<>();
-    boolean readed = false;
-    if (username != null)
+    try
     {
-      User user = userRepo.findByUsername(username);
-      if (user != null)
+      List<User> users = new ArrayList<>();
+      if (username != null)
       {
+        User user = userService.getByUsername(username);
         users.add(user);
       }
-      readed = true;
-    }
-    if (userID != null)
-    {
-      if (readed)
+      else
       {
-        return gson.toJson(new Response("Search should be by ID or by Name", false));
+        users = userService.getAll();
       }
-      Optional<User> user = userRepo.findById(userID);
-      user.ifPresent(users::add);
-      readed = true;
+      return gson.toJson(new Response(users));
     }
-    if (!readed)
+    catch (MException e)
     {
-      users = userRepo.findAll();
+      return gson.toJson(new Response(e.getMessage(), false));
     }
-    return users != null && !users.isEmpty() ? gson.toJson(new Response(users))
-                                             : gson.toJson(new Response("Users not found", false));
+  }
+
+  @GetMapping("/users/{id}")
+  @PreAuthorize("hasAuthority('ADMIN')")
+  public String readUser(@PathVariable Long id)
+  {
+    try
+    {
+      return gson.toJson(new Response(userService.getById(id)));
+    }
+    catch (MException e)
+    {
+      return gson.toJson(new Response(e.getMessage(), false));
+    }
   }
 
   @GetMapping("/operations")
@@ -141,15 +146,9 @@ public class ManagerController
       List<Operation> operations = operationService.getAll();
       if (userID != null)
       {
-        Optional<User> user = userRepo.findById(userID);
-        if (user.isEmpty())
-        {
-          return gson.toJson(new Response("User by this ID not found", false));
-        }
-        operations = operationService.getByBalance(user.get().getBalance());
+        operations = operationService.getByBalance(userService.getById(userID).getBalance());
       }
       operations = operationService.filterByArticleName(article, operations);
-
       return gson.toJson(new Response(operations));
     }
     catch (MException e)
@@ -173,8 +172,7 @@ public class ManagerController
   }
 
   @GetMapping("/articles")
-  public String readArticles(@RequestParam(required = false) String article,
-                             @RequestParam(required = false) Long articleID)
+  public String readArticles(@RequestParam(required = false) String article)
   {
     try
     {
@@ -244,31 +242,15 @@ public class ManagerController
   @PostMapping("/registration")
   public String addUser(@RequestParam String username, @RequestParam String password)
   {
-    if (username.trim().isEmpty())
+    try
     {
-      return gson.toJson(new Response("Enter username", false));
+      userService.add(username, password);
+      return gson.toJson(new Response());
     }
-    if (password.trim().isEmpty())
+    catch (MException e)
     {
-      return gson.toJson(new Response("Enter password", false));
+      return gson.toJson(new Response(e.getMessage(), false));
     }
-
-    if (userRepo.findByUsername(username) != null)
-    {
-      return gson.toJson(new Response("This user already exist", false));
-    }
-
-    Balance balance = new Balance();
-    balanceService.addOrUpdate(balance);
-    User user = new User();
-    user.setUsername(username);
-    user.setActive(true);
-    user.setPassword(bCryptPasswordEncoder.encode(password));
-    user.setRoles(Collections.singleton(Role.USER));
-    user.setBalance(balance);
-    userRepo.save(user);
-
-    return gson.toJson(new Response());
   }
 
   @PatchMapping("/articles/{id}")

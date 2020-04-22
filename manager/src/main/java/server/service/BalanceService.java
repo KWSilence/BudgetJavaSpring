@@ -13,12 +13,10 @@ import java.util.Optional;
 public class BalanceService
 {
   private final BalanceRepo repository;
-  private final UserService userService;
 
-  public BalanceService(BalanceRepo repository, UserService userService)
+  public BalanceService(BalanceRepo repository)
   {
     this.repository = repository;
-    this.userService = userService;
   }
 
   public Balance getById(Long id) throws MException

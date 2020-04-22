@@ -3,9 +3,11 @@ package server.entities;
 import com.google.gson.annotations.Expose;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import server.config.WebSecurityConfig;
 
 import javax.persistence.*;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 
 @Entity
@@ -26,10 +28,33 @@ public class User implements UserDetails
   @Expose
   private Set<Role> roles;
 
-  @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "balance_id")
   @Expose
   private Balance balance;
+
+  public User()
+  {
+
+  }
+
+  public User(String username, String password, Balance balance)
+  {
+    this.username = username;
+    this.password = WebSecurityConfig.bCryptPasswordEncoder().encode(password);
+    this.balance = balance;
+    this.active = true;
+    this.roles = Collections.singleton(Role.USER);
+  }
+
+  public User(String username, String password)
+  {
+    this.username = username;
+    this.password = WebSecurityConfig.bCryptPasswordEncoder().encode(password);
+    this.balance = null;
+    this.active = true;
+    this.roles = Collections.singleton(Role.ADMIN);
+  }
 
   public Long getId()
   {
