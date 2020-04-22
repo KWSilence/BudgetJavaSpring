@@ -1,0 +1,23 @@
+version: "3.1"
+services:
+    manage-app:
+        image: kwsilence/manage-app
+        ports:
+            - "8080:8080"
+        networks:
+            - manager-mysql
+        depends_on:
+            - manager
+ 
+    manager:
+        image: mysql
+        ports:
+            - "3306:3306"
+        networks:
+            - manager-mysql
+        environment:
+            - MYSQL_ROOT_PASSWORD=kws
+            - MYSQL_DATABASE=manage  
+
+networks:
+    manager-mysql: 

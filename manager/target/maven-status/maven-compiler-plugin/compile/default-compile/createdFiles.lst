@@ -1,7 +1,11 @@
 server/config/WebSecurityConfig.class
 server/entities/Article.class
+server/service/ArticleService.class
+server/service/BalanceService.class
 server/repos/BalanceRepo.class
+server/repos/MException.class
 server/controller/ManagerController.class
+server/service/OperationService.class
 server/entities/Balance.class
 server/entities/Response.class
 server/config/MvcConfig.class

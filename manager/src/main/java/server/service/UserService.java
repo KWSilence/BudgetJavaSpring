@@ -86,7 +86,6 @@ public class UserService implements UserDetailsService
     }
 
     Balance balance = new Balance();
-    balanceService.addOrUpdate(balance);
     User user = new User(username, password, balance);
     repository.saveAndFlush(user);
   }
