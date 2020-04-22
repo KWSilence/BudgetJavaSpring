@@ -219,7 +219,6 @@ public class ManagerController
     }
     catch (MException e)
     {
-      System.out.println("FUCK: " + e.getMessage());
       return gson.toJson(new Response(e.getMessage(), false));
     }
   }
@@ -284,7 +283,6 @@ public class ManagerController
     }
     catch (MException e)
     {
-      System.out.println("FUCK: " + e.getMessage());
       return gson.toJson(new Response(e.getMessage(), false));
     }
   }
@@ -301,7 +299,6 @@ public class ManagerController
     }
     catch (MException e)
     {
-      System.out.println("FUCK: " + e.getMessage());
       return gson.toJson(new Response(e.getMessage(), false));
     }
 
@@ -317,7 +314,6 @@ public class ManagerController
     }
     catch (MException e)
     {
-      System.out.println("FUCK: " + e.getMessage());
       return gson.toJson(new Response(e.getMessage(), false));
     }
   }

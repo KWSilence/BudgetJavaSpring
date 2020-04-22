@@ -124,17 +124,17 @@ public class OperationService
 
   private void checkOperation(Article article, Double debit, Double credit) throws MException
   {
-    if (credit != null && credit < 0 && (credit.toString().length() - credit.toString().indexOf('.')) > 3)
+    if (credit != null && (credit < 0 || (credit.toString().length() - credit.toString().indexOf('.')) > 3))
     {
       throw new MException("Operation credit not correct(negative or not *.00)");
     }
 
-    if (debit != null && debit < 0 && (debit.toString().length() - debit.toString().indexOf('.')) > 3)
+    if (debit != null && (debit < 0 || (debit.toString().length() - debit.toString().indexOf('.')) > 3))
     {
       throw new MException("Operation debit not correct(negative or not *.00)");
     }
 
-    if (article != null && article.getName().trim().isEmpty() && !articleService.isExistByName(article.getName()))
+    if (article != null && (article.getName().trim().isEmpty() || !articleService.isExistByName(article.getName())))
     {
       throw new MException("Article name in operation not correct");
     }
@@ -148,7 +148,7 @@ public class OperationService
     }
     if (operations.isEmpty())
     {
-      throw new MException("Operations by this article not found (can be caused by additional filter)");
+      throw new MException("Operations by this article not found");
     }
     return operations;
   }

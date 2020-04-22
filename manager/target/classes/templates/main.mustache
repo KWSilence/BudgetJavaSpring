@@ -196,6 +196,7 @@
         xhr.open('GET', '/api/me', false);
         xhr.send();
         let currentUser = JSON.parse(xhr.responseText);
+        console.log('Get user request succeeded with JSON response', currentUser);
         user.appendChild(document.createTextNode("User: " + currentUser.body.username));
         let isAdmin = (currentUser.body.roles[0] === "ADMIN");
 
@@ -604,11 +605,20 @@
                 editButton.type = "submit";
                 editButton.value = "editing";
                 editButton.style.height = "30px";
-                editButton.onclick = function () {
+                editButton.onclick = function (e) {
                     let xhr = new XMLHttpRequest();
                     xhr.open("PATCH", "/api/balance/operations/" + req.body[index].id + "?article=" + articlesInput.value + "&debit=" + debitInput.value + "&credit=" + creditInput.value, false);
                     xhr.send();
-                    location.reload();
+                    let res = JSON.parse(xhr.responseText);
+                    if (res.success === false)
+                    {
+                        alert(res.error);
+                        e.preventDefault();
+                    }
+                    else
+                    {
+                        location.reload();
+                    }
                 };
                 td.appendChild(editButton);
                 row.appendChild(td);
