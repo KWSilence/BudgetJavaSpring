@@ -148,6 +148,11 @@ public class OperationService
 
   public Double convertToDouble(String num, String name) throws MException
   {
+    if (num == null)
+    {
+      return null;
+    }
+
     if (num.trim().isEmpty())
     {
       return null;

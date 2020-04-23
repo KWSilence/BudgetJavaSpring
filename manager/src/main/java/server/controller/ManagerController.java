@@ -57,6 +57,7 @@ public class ManagerController
   }
 
   @GetMapping("/balance")
+  @PreAuthorize("hasAuthority('USER')")
   public String readBalance(@AuthenticationPrincipal User userUp)
   {
     try
@@ -71,6 +72,7 @@ public class ManagerController
   }
 
   @GetMapping("/balance/operations")
+  @PreAuthorize("hasAuthority('USER')")
   public String readOperations(@AuthenticationPrincipal User userUp, @RequestParam(required = false) String article)
   {
     try
@@ -86,6 +88,7 @@ public class ManagerController
   }
 
   @GetMapping("/balance/operations/{id}")
+  @PreAuthorize("hasAuthority('USER')")
   public String readOperation(@AuthenticationPrincipal User userUp, @PathVariable Long id)
   {
     try
@@ -207,6 +210,7 @@ public class ManagerController
   }
 
   @PostMapping("/balance/operations")
+  @PreAuthorize("hasAuthority('USER')")
   public String addOperation(@AuthenticationPrincipal User userUp, @RequestParam String article,
                              @RequestParam(required = false) String debit,
                              @RequestParam(required = false) String credit)
@@ -270,6 +274,7 @@ public class ManagerController
   }
 
   @PatchMapping("/balance/operations/{id}")
+  @PreAuthorize("hasAuthority('USER')")
   public String changeOperation(@AuthenticationPrincipal User userUp, @PathVariable Long id,
                                 @RequestParam(required = false) String article,
                                 @RequestParam(required = false) String debit,
@@ -305,6 +310,7 @@ public class ManagerController
   }
 
   @DeleteMapping("/balance/operations")
+  @PreAuthorize("hasAuthority('USER')")
   public String deleteAllOperation(@AuthenticationPrincipal User userUp)
   {
     try

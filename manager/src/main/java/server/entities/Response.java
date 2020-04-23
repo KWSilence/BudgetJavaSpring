@@ -1,15 +1,19 @@
 package server.entities;
 
+import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;
+import com.google.gson.internal.LinkedTreeMap;
+
+import java.util.ArrayList;
 
 public class Response
 {
   @Expose
-  Object body;
+  private Object body;
   @Expose
-  Boolean success;
+  private Boolean success;
   @Expose
-  String error;
+  private String error;
 
   public Response(Object body, Boolean success, String error)
   {
@@ -37,5 +41,36 @@ public class Response
     this.error = error;
     this.success = success;
     this.body = "";
+  }
+
+  public Object getBody()
+  {
+    return body;
+  }
+
+  public ArrayList<LinkedTreeMap<String, Object>> getArrayBody()
+  {
+    return (ArrayList<LinkedTreeMap<String, Object>>) body;
+  }
+
+  public LinkedTreeMap<String, Object> getMapBody()
+  {
+    return (LinkedTreeMap<String, Object>) body;
+  }
+
+  public static Response parseJson(String json)
+  {
+    Gson gson = new Gson();
+    return gson.fromJson(json, Response.class);
+  }
+
+  public Boolean getSuccess()
+  {
+    return success;
+  }
+
+  public String getError()
+  {
+    return error;
   }
 }

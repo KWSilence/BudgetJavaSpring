@@ -31,10 +31,6 @@ public class BalanceService
 
   public Balance getByUser(User user) throws MException
   {
-    if (user.isAdmin())
-    {
-      throw new MException("Admin have not balance");
-    }
     return getById(user.getBalance().getId());
   }
 
