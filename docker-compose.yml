@@ -1,22 +1,27 @@
 version: "3.1"
 services:
+    manager:
+        image: mysql
+        container_name: java_spring_db
+        networks:
+            - manager-mysql
+        environment:
+            - MYSQL_ROOT_PASSWORD=kws
+            - MYSQL_DATABASE=manage
+
+        security_opt:
+            - seccomp:unconfined
+        restart: always
+
     manage-app:
         image: kwsilence/manage-app
+        container_name: java_spring_app
         ports:
             - "8080:8080"
         networks:
             - manager-mysql
         depends_on:
             - manager
-        restart: always
- 
-    manager:
-        image: mysql
-        networks:
-            - manager-mysql
-        environment:
-            - MYSQL_ROOT_PASSWORD=kws
-            - MYSQL_DATABASE=manage  
         restart: always
 
 networks:
