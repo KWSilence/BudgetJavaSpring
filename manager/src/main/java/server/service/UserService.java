@@ -6,7 +6,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import server.entities.Balance;
 import server.entities.User;
-import server.repos.MException;
+import server.response.MException;
 import server.repos.UserRepo;
 
 import java.util.List;

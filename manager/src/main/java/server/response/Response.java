@@ -1,4 +1,4 @@
-package server.entities;
+package server.response;
 
 import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;

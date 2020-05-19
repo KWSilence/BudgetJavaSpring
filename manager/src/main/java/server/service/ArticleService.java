@@ -3,7 +3,7 @@ package server.service;
 import org.springframework.stereotype.Service;
 import server.entities.Article;
 import server.repos.ArticleRepo;
-import server.repos.MException;
+import server.response.MException;
 
 import java.util.List;
 import java.util.Optional;

@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import server.entities.Balance;
 import server.entities.User;
 import server.repos.BalanceRepo;
-import server.repos.MException;
+import server.response.MException;
 
 import java.util.Optional;
 

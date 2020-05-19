@@ -10,7 +10,7 @@ import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.junit4.SpringRunner;
 import server.Application;
 import server.controller.ManagerController;
-import server.entities.Response;
+import server.response.Response;
 import server.entities.User;
 import server.repos.UserRepo;
 

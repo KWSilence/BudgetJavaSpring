@@ -5,7 +5,7 @@ import server.entities.Article;
 import server.entities.Balance;
 import server.entities.Operation;
 import server.entities.User;
-import server.repos.MException;
+import server.response.MException;
 import server.repos.OperationRepo;
 
 import java.util.List;

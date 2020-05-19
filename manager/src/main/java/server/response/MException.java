@@ -1,4 +1,4 @@
-package server.repos;
+package server.response;
 
 public class MException extends Exception
 {
