@@ -1,4 +1,4 @@
-# JavaSpring
+# Budget accounting Java Spring
 
 start application:
 **sudo docker-compose up**
