@@ -20,9 +20,13 @@ services:
           name: manage-db
           property: port
       - key: DB_USER
-        value: manageadmin
+        fromDatabase:
+          name: manage-db
+          property: user
       - key: DB_PASS
-        value: kws
+        fromDatabase:
+          name: manage-db
+          property: password
 
 databases:
   - name: manage-db

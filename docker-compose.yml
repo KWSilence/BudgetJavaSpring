@@ -17,7 +17,7 @@ services:
             - DB_HOST=manage-db
             - DB_PORT=5432
             - DB_USER=manageadmin
-            - DB_PASSWORD=kws
+            - DB_PASS=kws
         restart: always
 
     manage-db:
