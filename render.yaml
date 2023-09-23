@@ -1,0 +1,39 @@
+services:
+
+  - type: web
+    name: manage-app
+    runtime: image
+    image:
+      url: docker.io/kwsilence/manage-app:render
+    plan: free
+    envVars:
+      - key: MANAGE_ROOT_USER
+        value: admin
+      - key: MANAGE_ROOT_PASS
+        value: admin
+      - key: MYSQL_HOST
+        fromService:
+          type: web
+          name: manage-db
+          property: host
+      - key: MYSQL_PORT
+        fromService:
+          type: web
+          name: manage-db
+          property: port
+      - key: MYSQL_USER
+        value: root
+      - key: MYSQL_PASSWORD
+        value: kws
+
+  - type: web
+    name: manage-db
+    runtime: image
+    image:
+      url: docker.io/library/mysql:latest
+    plan: free
+    envVars:
+      - key: MYSQL_ROOT_PASSWORD
+        value: kws
+      - key: MYSQL_DATABASE
+        value: manage
