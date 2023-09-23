@@ -33,6 +33,8 @@ services:
       url: docker.io/library/mysql:latest
     plan: free
     envVars:
+      - key: PORT
+        value: 3306
       - key: MYSQL_ROOT_PASSWORD
         value: kws
       - key: MYSQL_DATABASE
