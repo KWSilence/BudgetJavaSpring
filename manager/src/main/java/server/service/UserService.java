@@ -22,9 +22,11 @@ public class UserService implements UserDetailsService
   {
     this.repository = repository;
     this.balanceService = balanceService;
-    if (repository.findByUsername("root") == null)
+    String rootUsername = System.getenv("MANAGE_ROOT_USER");
+    String rootPassword = System.getenv("MANAGE_ROOT_PASS");
+    if (repository.findByUsername(rootUsername) == null)
     {
-      User root = new User("root", "kws");
+      User root = new User(rootUsername, rootPassword);
       repository.save(root);
     }
   }

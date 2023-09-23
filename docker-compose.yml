@@ -2,7 +2,7 @@ version: "3.1"
 services:
 
     manage-app:
-#        image: kwsilence/manage-app
+#        image: kwsilence/manage-app:render
         build: .
         container_name: java_spring_app
         depends_on:
@@ -12,13 +12,19 @@ services:
         networks:
             - manage-network
         environment:
+            - MANAGE_ROOT_USER=admin
+            - MANAGE_ROOT_PASS=admin
             - MYSQL_HOST=manage-db
             - MYSQL_PORT=3306
+            - MYSQL_USER=root
+            - MYSQL_PASSWORD=kws
         restart: always
 
     manage-db:
         image: mysql
         container_name: java_spring_db
+        ports:
+            - "3306:3306"
         networks:
             - manage-network
         environment:
