@@ -28,3 +28,4 @@ databases:
   - name: manage-db
     databaseName: manage
     user: manageadmin
+    plan: free
