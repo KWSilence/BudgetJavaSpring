@@ -14,24 +14,23 @@ services:
         environment:
             - MANAGE_ROOT_USER=admin
             - MANAGE_ROOT_PASS=admin
-            - MYSQL_HOST=manage-db
-            - MYSQL_PORT=3306
-            - MYSQL_USER=root
-            - MYSQL_PASSWORD=kws
+            - DB_HOST=manage-db
+            - DB_PORT=5432
+            - DB_USER=manageadmin
+            - DB_PASSWORD=kws
         restart: always
 
     manage-db:
-        image: mysql
+        image: postgres
         container_name: java_spring_db
         ports:
-            - "3306:3306"
+            - "5432:5432"
         networks:
             - manage-network
         environment:
-            - MYSQL_ROOT_PASSWORD=kws
-            - MYSQL_DATABASE=manage
-        security_opt:
-            - seccomp:unconfined
+            - POSTGRES_DB=manage
+            - POSTGRES_USER=manageadmin
+            - POSTGRES_PASSWORD=kws
         restart: always
 
 networks:

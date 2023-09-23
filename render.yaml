@@ -11,31 +11,20 @@ services:
         value: admin
       - key: MANAGE_ROOT_PASS
         value: admin
-      - key: MYSQL_HOST
-        fromService:
-          type: web
+      - key: DB_HOST
+        fromDatabase:
           name: manage-db
           property: host
-      - key: MYSQL_PORT
-        fromService:
-          type: web
+      - key: DB_PORT
+        fromDatabase:
           name: manage-db
           property: port
-      - key: MYSQL_USER
-        value: root
-      - key: MYSQL_PASSWORD
+      - key: DB_USER
+        value: manageadmin
+      - key: DB_PASS
         value: kws
 
-  - type: web
-    name: manage-db
-    runtime: image
-    image:
-      url: docker.io/library/mysql:latest
-    plan: free
-    envVars:
-      - key: PORT
-        value: 3306
-      - key: MYSQL_ROOT_PASSWORD
-        value: kws
-      - key: MYSQL_DATABASE
-        value: manage
+databases:
+  - name: manage-db
+    databaseName: manage
+    user: manageadmin
