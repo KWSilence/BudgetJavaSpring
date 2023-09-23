@@ -1,0 +1,3 @@
+**/.idea
+manager/target/*
+!manager/target/manager-1.0-SNAPSHOT.jar
