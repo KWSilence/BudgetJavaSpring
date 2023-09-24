@@ -31,5 +31,5 @@ services:
 databases:
   - name: manage-db
     databaseName: manage
-    user: manageadmin
+    user: manage_admin
     plan: free
