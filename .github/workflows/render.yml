@@ -9,8 +9,7 @@ jobs:
   docker-image:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
@@ -26,6 +25,14 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPOSITORY }}:render
 
-#  render-deploy:
-#    needs: [ docker-image ]
-#    runs-on: ubuntu-latest
+  render-deploy:
+    needs: [ docker-image ]
+    runs-on: ubuntu-latest
+    environment: manual-approve
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy
+        env:
+          deploy_url: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          curl "$deploy_url"
