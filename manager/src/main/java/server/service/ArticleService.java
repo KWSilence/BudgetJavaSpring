@@ -5,8 +5,10 @@ import server.entities.Article;
 import server.repos.ArticleRepo;
 import server.response.MException;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ArticleService
@@ -57,7 +59,11 @@ public class ArticleService
     {
       throw new MException("Articles not found");
     }
-    return articles;
+
+    return articles
+            .stream()
+            .sorted(Comparator.comparingInt(lhs -> lhs.getId().intValue()))
+            .collect(Collectors.toList());
   }
 
   private boolean isExistById(Long id)

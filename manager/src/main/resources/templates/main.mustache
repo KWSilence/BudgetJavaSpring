@@ -225,7 +225,6 @@
         if (isAdmin) {
             userDiv.remove();
             adminDiv.style.display = "block";
-            document.getElementById("articleMessage").style.display = 'block';
             document.getElementById("addArticle").style.display = 'block';
             document.getElementById("changeArticle").style.display = 'block';
             let articlesTable = document.getElementById("articlesForAdmin");
@@ -416,9 +415,10 @@
                     });
         } else {
             adminDiv.remove();
-            document.getElementById("deleteAll").style.display = 'block';
-            document.getElementById("filter").style.display = 'block';
+            document.getElementById("articleMessage").style.display = 'block';
             document.getElementById("addOperation").style.display = 'block';
+            document.getElementById("filter").style.display = 'block';
+            document.getElementById("deleteAll").style.display = 'block';
             document.getElementById("filtering").onclick = function (e) {
                 let filter = document.getElementById("filterArticle");
                 if (filter.value === "") {
