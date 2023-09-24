@@ -18,11 +18,11 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v2
-      - name: Build and push for Windows
+      - name: Build and push
         uses: docker/build-push-action@v3
         with:
           context: .
-          file: ./Dockerfile-windows
+          file: ./Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPOSITORY }}:render
 
