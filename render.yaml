@@ -5,6 +5,7 @@ services:
     runtime: image
     image:
       url: docker.io/kwsilence/manage-app:render
+    region: frankfurt
     plan: free
     envVars:
       - key: MANAGE_ROOT_USER
@@ -32,4 +33,5 @@ databases:
   - name: manage-db
     databaseName: manage
     user: manageadmin
+    region: frankfurt
     plan: free
