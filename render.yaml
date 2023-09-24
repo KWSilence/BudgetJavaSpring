@@ -19,6 +19,10 @@ services:
         fromDatabase:
           name: manage-db
           property: port
+      - key: DB_SCHEME
+        fromDatabase:
+          name: manage-db
+          property: database
       - key: DB_USER
         fromDatabase:
           name: manage-db
