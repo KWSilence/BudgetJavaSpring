@@ -70,7 +70,7 @@
 <div id="userDiv">
     <div id="balance" style="margin-top: 10px;"></div>
 
-    <div style="margin-top: 10px">
+    <div id="articleMessage" style="margin-top: 10px; display: none;">
         <span>To use new articles please contact the administration</span>
     </div>
 
@@ -225,6 +225,7 @@
         if (isAdmin) {
             userDiv.remove();
             adminDiv.style.display = "block";
+            document.getElementById("articleMessage").style.display = 'block';
             document.getElementById("addArticle").style.display = 'block';
             document.getElementById("changeArticle").style.display = 'block';
             let articlesTable = document.getElementById("articlesForAdmin");
